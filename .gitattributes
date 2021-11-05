@@ -1,0 +1,10 @@
+*.cs text diff=csharp
+
+*.dll binary
+*.exe binary
+*.pdb binary
+*.cmd text
+*.sln text
+*.csproj text
+*.config text
+*.nuspec text

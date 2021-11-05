@@ -1,0 +1,14 @@
+﻿<customUI xmlns='http://schemas.microsoft.com/office/2009/07/customui' onLoad='OnLoad'>
+  <ribbon startFromScratch='false'>
+    <tabs>
+      <tab id='tabPublish' label='Dans'>
+        <group id='Group1' label='Publish'>
+          <!-- https://bert-toolkit.com/imagemso-list.html -->
+          <!-- https://docs.microsoft.com/en-us/openspecs/office_standards/ms-customui/ec42bfd0-149c-495b-895c-3bc708b8a149-->
+          <button id='btnStartSharing' label='Start Sharing' imageMso='MacroPlay' size='large' onAction='StartPublishPositions'/>
+          <button id='btnStopSharing' label='Stop Sharing' imageMso='MacroRecorderPause' size='large' onAction='StopPublishPositions'/>
+        </group>
+      </tab>
+    </tabs>
+  </ribbon>
+</customUI>

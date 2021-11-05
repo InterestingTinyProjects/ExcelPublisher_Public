@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_PublishTargetUrl>D:\Projects\IIS\WebPublisher</_PublishTargetUrl>
+    <History>True|2021-11-05T05:15:28.8708488Z;False|2021-11-05T13:14:56.3209463+08:00;True|2021-11-05T13:09:09.0144699+08:00;</History>
+  </PropertyGroup>
+</Project>

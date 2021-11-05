@@ -1,0 +1,62 @@
+﻿{
+  "Timestamp": "2021-10-27T13:13:19.1029315+08:00",
+  "Rows": 5,
+  "Columns": 9,
+  "Data": [
+    [
+      "Positions",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      "#",
+      "Instrument",
+      "Status",
+      "Long/Short",
+      "Amount",
+      "Open",
+      "Close",
+      "PnL",
+      "Exposure"
+    ],
+    [
+      1.0,
+      "Vodafone",
+      "Open",
+      "Long",
+      200.0,
+      120.38,
+      110.8,
+      "-35 GBP",
+      263.0
+    ],
+    [
+      2.0,
+      "USDCNH",
+      "Open",
+      "Long",
+      40000.0,
+      6.4542,
+      6.3829,
+      "-7145 CNH",
+      "80000 USD"
+    ]
+  ]
+}
