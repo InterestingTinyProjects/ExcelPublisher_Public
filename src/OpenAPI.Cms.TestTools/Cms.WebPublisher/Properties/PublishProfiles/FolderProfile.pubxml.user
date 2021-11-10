@@ -4,7 +4,7 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
 -->
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <_PublishTargetUrl>D:\Projects\Dan\Dans\Releases\WebPublisher</_PublishTargetUrl>
-    <History>True|2021-11-04T05:57:31.3229555Z;True|2021-11-04T13:53:10.2692939+08:00;True|2021-10-29T17:08:30.7830513+08:00;True|2021-10-29T10:17:16.8528238+08:00;True|2021-10-29T10:16:13.9381890+08:00;True|2021-10-28T22:26:29.6791515+08:00;True|2021-10-28T22:22:41.0323389+08:00;True|2021-10-27T14:32:56.4378203+08:00;True|2021-10-27T14:17:29.6308383+08:00;</History>
+    <_PublishTargetUrl>C:\inetpub\WebPublisher</_PublishTargetUrl>
+    <History>True|2021-11-10T01:23:01.1592032Z;False|2021-11-10T09:22:24.4537600+08:00;False|2021-11-10T09:21:49.0722020+08:00;False|2021-11-10T09:17:12.5319582+08:00;False|2021-11-10T09:16:18.7084010+08:00;False|2021-11-10T09:15:46.7104769+08:00;</History>
   </PropertyGroup>
 </Project>
