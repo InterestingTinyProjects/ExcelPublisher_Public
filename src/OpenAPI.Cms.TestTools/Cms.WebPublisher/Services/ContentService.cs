@@ -35,7 +35,7 @@ namespace Cms.WebPublisher.Services
         private string GetHtmlView(GenericCellData data)
         {
             string[] formatters = null;
-            if (!_sheetFormatter.TryGetValue(data.SheetName, out formatters))
+            if (data.HasValue && !_sheetFormatter.TryGetValue(data.SheetName, out formatters))
                 formatters = null; 
 
             var builder = new StringBuilder();
@@ -48,14 +48,17 @@ namespace Cms.WebPublisher.Services
                 for (int j = 0; j < data.Columns; j++)
                 {
                     builder.Append("<td>");
-                    if(data.Data[i, j] == null || data.Data[i, j].GetType() != typeof(double))                
-                        builder.Append(data.Data[i, j]);
-                    else if(formatters != null && formatters.Length > j)
+
+                    // The value is a double and there is a formatter
+                    if(data.Data[i, j] != null && data.Data[i, j].GetType() == typeof(double) && 
+                        formatters != null && formatters.Length > j)
                     {
                         double doubleVal = (double)data.Data[i, j];
                         var format = formatters[j];
                         builder.Append(doubleVal.ToString(format));
                     }
+                    else
+                        builder.Append(data.Data[i, j]);
 
                     builder.Append("</td>");
                 }

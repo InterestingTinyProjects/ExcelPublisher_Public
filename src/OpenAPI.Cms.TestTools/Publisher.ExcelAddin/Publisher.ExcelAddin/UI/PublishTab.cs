@@ -105,8 +105,8 @@ namespace Publisher.ExcelAddin
             {
                 var dbConn = Config.DbConnectionString;
                 var repo = new WebPublisherRepository(dbConn);
-                repo.TestDBCOnnection();
-                MessageBox.Show($"DB Connected. Connection: {Config.DbConnectionString}", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                var ret = repo.TestDBCOnnection();
+                MessageBox.Show($"DB Connected. Found {ret} records. \r\n Connection: {Config.DbConnectionString}", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch(Exception ex)
             {

@@ -2,6 +2,7 @@ using Cms.WebPublisher.DB;
 using Cms.WebPublisher.Models;
 using Cms.WebPublisher.Services;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -42,6 +43,8 @@ namespace Cms.WebPublisher
 
             app.UseStaticFiles();
 
+            app.UseDeveloperExceptionPage();
+
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
@@ -75,6 +78,18 @@ namespace Cms.WebPublisher
                     var json = JsonConvert.SerializeObject(sheetView);
                     context.Response.ContentType = "application/json";
                     await context.Response.WriteAsync(json);
+                });
+
+                endpoints.MapGet("/error", async context =>
+                {
+                    context.Response.ContentType = "text/html";
+                    Exception ex = context.Features.Get<IExceptionHandlerPathFeature>().Error;
+
+                    await context.Response.WriteAsync("<html><head><title>Error</title></head><body>");
+                    await context.Response.WriteAsync($"<h3>{ex.Message}</h3>");
+                    await context.Response.WriteAsync($"<p>Type: {ex.GetType().FullName}");
+                    await context.Response.WriteAsync($"<p>StackTrace: {ex.StackTrace}");
+                    await context.Response.WriteAsync("</body></html>");
                 });
             });
         }

@@ -18,5 +18,13 @@ namespace Cms.WebPublisher.Models
 
         public object[,] Data { get; set; }
 
+        public bool HasValue
+        {
+            get
+            {
+                return Data != null;
+            }
+        }
+
     }
 }

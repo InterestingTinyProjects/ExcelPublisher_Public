@@ -20,14 +20,18 @@ namespace OpenApi.Cms.TestTools.Client.DB
             _connString = connString;
         }
 
-        public bool TestDBCOnnection()
+        public object TestDBCOnnection()
         {
             using (var conn = new SqlConnection(_connString))
             {
                 try
                 {
                     conn.Open();
-                    return true;
+                    var command = conn.CreateCommand();
+                    command.CommandText = $"SELECT COUNT(row_id) FROM [dbo].[Record]";
+                    command.CommandType = CommandType.Text;
+                    command.CommandTimeout = 300;
+                    return command.ExecuteScalar();
                 }
                 catch
                 {
