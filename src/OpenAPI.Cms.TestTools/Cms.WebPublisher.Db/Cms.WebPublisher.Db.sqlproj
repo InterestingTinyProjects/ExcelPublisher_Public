@@ -67,4 +67,9 @@
   <ItemGroup>
     <RefactorLog Include="Cms.WebPublisher.Db.refactorlog" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="SQLScripts.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

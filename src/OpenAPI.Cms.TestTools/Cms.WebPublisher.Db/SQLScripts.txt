@@ -1,0 +1,93 @@
+
+
+CREATE TABLE [dbo].[Record](
+	[row_id] [bigint] IDENTITY(1,1) NOT NULL,
+	[sheetName] [nvarchar](150) NULL,
+	[publishTime] [datetime2](7) NULL,
+	[rows] [int] NULL,
+	[columns] [int] NULL,
+	[data] [varbinary](max) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[row_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+
+
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbo].[GetLatestPositions]
+	@sheetName NVARCHAR(150)
+AS
+BEGIN
+
+SELECT TOP 1 [publishTime],
+		r.[sheetName],
+		[rows],
+		[columns],
+		[data]
+FROM [dbo].[Record] r
+WHERE sheetName = @sheetName
+ORDER BY publishTime DESC
+
+END
+GO
+
+
+
+
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbo].[PublishPositions]
+	@publishTime DATETIME2,
+	@sheetName NVARCHAR(150),
+	@rows INT,
+	@columns INT,
+	@data VARBINARY(MAX)
+AS
+BEGIN
+
+DECLARE @count INT;
+
+-- remove redundent rows
+SELECT @count = COUNT(row_id)
+FROM [dbo].[Record]
+
+IF @count > 18000
+BEGIN
+	DELETE [dbo].[Record]
+	WHERE [sheetName] = @sheetName
+END
+
+
+INSERT INTO [dbo].[Record]
+(
+	[sheetName],
+	[publishTime],
+	[rows],
+	[columns],
+	[data]
+)
+VALUES
+(
+	@sheetName,
+	@publishTime,
+	@rows,
+	@columns,
+	@data
+)
+
+-- return
+SELECT @@ROWCOUNT
+
+END
+GO
+
