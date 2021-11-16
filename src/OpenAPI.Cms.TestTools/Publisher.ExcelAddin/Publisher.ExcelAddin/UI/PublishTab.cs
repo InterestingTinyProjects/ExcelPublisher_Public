@@ -5,7 +5,9 @@ using Newtonsoft.Json;
 using OpenApi.Cms.TestTools.Client;
 using OpenApi.Cms.TestTools.Client.DB;
 using OpenApi.Cms.TestTools.Client.Models;
+using Publisher.ExcelAddin.UI;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -24,10 +26,8 @@ namespace Publisher.ExcelAddin
     {
         private IRibbonUI _ribbon;
         private Application _app;
-        private List<Worksheet> _fromSheets;
-        private Dictionary<string, string> _sheetsToPublish;
-        private System.Timers.Timer _timer;
-        private bool _isRunning;
+        private ConcurrentDictionary<string, PublishRunner> _runners = new ConcurrentDictionary<string, PublishRunner>();
+        private Config _config = new Config();
 
         /// <summary>
         /// Create the Tab
@@ -60,9 +60,6 @@ namespace Publisher.ExcelAddin
             _app = ExcelDnaUtil.Application as Application;
             if (_app.Workbooks.Count == 0)
                 _app.Workbooks.Add();
-
-            // Set Timer
-            SetTimer();
         }
 
         /// <summary>
@@ -71,20 +68,33 @@ namespace Publisher.ExcelAddin
         /// <param name="control"></param>
         public void StartPublishPositions(IRibbonControl control)
         {
-            // Load Sheets
-            if (_fromSheets == null || !_fromSheets.Any())
+            if(_runners.Any())
             {
-                _fromSheets = new List<Worksheet>();
-                _sheetsToPublish = Config.SheetsToPublish;
-                foreach (Worksheet sheet in _app.Sheets)
-                {
-                    if (_sheetsToPublish.ContainsKey(sheet.Name))
-                        _fromSheets.Add(sheet);
-                }
+                MessageBox.Show($"Publishing {_runners.Count} reports. Please press the stop button first before restart.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
             }
 
-            _timer.Enabled = true;
-            _timer.Start();  
+            try
+            {
+                // create runners
+                var configSheet = _app.Sheets[_config.ConfigSheetName];
+                var reportConfigs = _config.GetConfigurations(configSheet);
+                foreach (var reportConfig in reportConfigs)
+                {
+                    var sheet = _app.Sheets[reportConfig.Sheet];
+                    _runners.TryAdd(reportConfig.ReportName, new PublishRunner(reportConfig, sheet));
+                }
+
+                _config?.PublishStarted(configSheet, _runners.Count);
+
+                // Start running
+                foreach (var runner in _runners.Values)
+                    runner.Start();
+            }
+            catch (Exception ex)
+            {
+                PopupWarning($"{ex.Message} - {ex.StackTrace}");
+            }
         }
 
         /// <summary>
@@ -93,9 +103,23 @@ namespace Publisher.ExcelAddin
         /// <param name="control"></param>
         public void StopPublishPositions(IRibbonControl control)
         {
-            _timer.Stop();
-            _timer.Enabled = false;
-            MessageBox.Show($"Publish stopped. ", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            try
+            {
+                foreach (var runner in _runners.Values)
+                {
+                    runner.Stop();
+                    runner.Dispose();
+                }
+                _runners.Clear();
+
+                var configSheet = _app.Sheets[_config.ConfigSheetName];
+                _config?.PublishStopped(configSheet);
+                MessageBox.Show($"Publish stopped. ", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch(Exception ex)
+            {
+                PopupWarning($"{ex.Message} - {ex.StackTrace}");
+            }
         }
 
 
@@ -103,29 +127,51 @@ namespace Publisher.ExcelAddin
         {
             try
             {
-                var dbConn = Config.DbConnectionString;
-                var repo = new WebPublisherRepository(dbConn);
-                var ret = repo.TestDBCOnnection();
-                MessageBox.Show($"DB Connected. Found {ret} records. \r\n Connection: {Config.DbConnectionString}", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                var configSheet = _app.Sheets[_config.ConfigSheetName];
+                var message = new StringBuilder();
+                var reportConfigs = _config.GetConfigurations(configSheet);
+                foreach (var reportConfig in reportConfigs)
+                {
+                    message.Clear();
+                    var validateResult = reportConfig.CheckDb(message);
+                    if (validateResult)
+                        MessageBox.Show($"{reportConfig.RowNumber}.{reportConfig.ReportName}. \r\n {message}", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    else
+                        MessageBox.Show($"FAILED. {reportConfig.RowNumber}.{reportConfig.ReportName} \r\n {message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
             }
             catch(Exception ex)
             {
-                MessageBox.Show($"DB connection failed. Connection: {Config.DbConnectionString}, Info: {ex.Message}", "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                PopupWarning($"{ex.Message} - {ex.StackTrace}");
             }
         }
 
-
-        /// <summary>
-        /// Set the timer
-        /// </summary>
-        private void SetTimer()
+        public void CheckConfig(IRibbonControl control)
         {
-            var interval = Config.Interval;
-            _timer = new System.Timers.Timer(interval);
-            _timer.Enabled = false;
-            _timer.Elapsed += (s, e) => {
-                PublishSheets();
-            };
+            try
+            {
+                var configSheet = _app.Sheets[_config.ConfigSheetName];
+                var message = new StringBuilder();
+                var reportConfigs = _config.GetConfigurations(configSheet);
+                foreach (var reportConfig in reportConfigs)
+                {
+                    message.Clear();
+                    var validateResult = reportConfig.Validate(message, _app);
+                    if (validateResult)
+                        MessageBox.Show($"{reportConfig.RowNumber}.{reportConfig.ReportName} is ready. \r\n - Sheet {_config.ConfigSheetName}. \r\n {message}", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    else
+                        MessageBox.Show($"FAILED. {reportConfig.RowNumber}.{reportConfig.ReportName} \r\n - Sheet {_config.ConfigSheetName} \r\n {message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                PopupWarning($"{ex.Message} - {ex.StackTrace}");
+            }
+        }
+
+        private void PopupWarning(string message)
+        {
+            MessageBox.Show(message, "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         /// <summary>
@@ -135,74 +181,6 @@ namespace Publisher.ExcelAddin
         private void ShowMessage(string message)
         {
             //_fromSheet..Cells[0, 0].Value2 = message;
-        }
-
-
-        private void PublishSheets()
-        {
-            try
-            {
-                if (_fromSheets == null || !_fromSheets.Any() || _isRunning)
-                    return;
-
-                _isRunning = true;
-                foreach (var sheet in _fromSheets)
-                {
-                    string rangeName;
-                    if (!_sheetsToPublish.TryGetValue(sheet.Name, out rangeName))
-                        rangeName = string.Empty;
-
-                    var data = GetCellData(sheet, rangeName);
-                    PublishToDB(data);
-                }
-                _isRunning = false;
-            }
-            catch (Exception ex)
-            {
-                _isRunning = false;
-            }
-        }
-
-        /// <summary>
-        /// Get data ona sheet
-        /// </summary>
-        /// <param name="fromSheet"></param>
-        /// <returns></returns>
-        private GenericCellData GetCellData(Worksheet fromSheet, string rangeName)
-        {
-            var sheetName = fromSheet.Name;
-            var usedRange = string.IsNullOrEmpty(rangeName)?fromSheet.UsedRange : fromSheet.Range[rangeName];
-            var val = usedRange.Value2 as object[,];
-
-            var cols = val.GetLength(1);
-            var rows = val.Length / cols;
-
-            return new GenericCellData
-            {
-                Timestamp = DateTime.Now,
-                Rows = rows,
-                Columns = cols,
-                Data = val,
-                SheetName = sheetName 
-            };
-
-            //var form = new FormCopyData();
-            //form.Data = JsonConvert.SerializeObject(data, Formatting.Indented);
-            //form.CellData = data;
-            //form.ShowDialog();
-        }
-
-        /// <summary>
-        /// Publish to DB
-        /// </summary>
-        /// <param name="cellData"></param>
-        /// <returns></returns>
-        /// 
-        private int PublishToDB(GenericCellData cellData)
-        {
-            var dbConn = Config.DbConnectionString;
-            var repo = new WebPublisherRepository(dbConn);
-            return repo.PublishPositions(cellData);
-        }
+        } 
     }
 }

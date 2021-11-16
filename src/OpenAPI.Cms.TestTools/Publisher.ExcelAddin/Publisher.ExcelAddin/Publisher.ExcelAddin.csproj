@@ -58,8 +58,10 @@
     <Compile Include="Config.cs" />
     <Compile Include="DB\WebPublisherRepository.cs" />
     <Compile Include="Models\GenericCellData.cs" />
+    <Compile Include="Models\ReportConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\PublishTab.cs" />
+    <Compile Include="UI\PublishRunner.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

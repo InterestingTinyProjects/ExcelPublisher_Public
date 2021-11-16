@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Microsoft.Office.Interop.Excel;
+using Newtonsoft.Json;
+using Publisher.ExcelAddin.Models;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -7,53 +10,87 @@ using System.Threading.Tasks;
 
 namespace OpenApi.Cms.TestTools.Client
 {
-
     public class Config
-    { 
-        public static int Interval 
+    {
+        private static readonly string StatusCell = "A1";
+        private static readonly int RowNumerColumn = 1;
+        private static readonly int ReportNameColumn = 2;
+        private static readonly int SheetRangeColumn = 4;
+        private static readonly int FormatterColumn = 5;
+        private static readonly int PublishColumn = 6;
+        private static readonly int IntervalColumn = 7;
+        private static readonly int DBServerColumn = 8;
+        private static readonly int DBNameColumn = 9;
+        private static readonly int DataPersistenceSecondsColumn = 10;
+        private static readonly int InactiveTimeoutColumn = 11;
+
+        public string ConfigSheetName
         {
             get
             {
-                int interval;
-                var val = ConfigurationManager.AppSettings["PublishInterval"];
-                if (!int.TryParse(val, out interval))
-                    return 100;
-
-                return interval;
-            }
-        }
-
-        public static string DbConnectionString
-        {
-            get
-            {
-                var val = ConfigurationManager.AppSettings["WebPublisherDB"]; 
+                var val = ConfigurationManager.AppSettings["ConfigSheet"];
                 if (string.IsNullOrEmpty(val))
-                    throw new Exception("Cannot find 'WebPublisherDB' in the confg file");
+                    throw new Exception("Cannot find 'ConfigSheet' in the .confg file");
 
                 return val;
             }
         }
 
-        public static Dictionary<string, string> SheetsToPublish
+        public ReportConfig[] GetConfigurations(Worksheet configSheet)
         {
-            get
-            {
-                var val = ConfigurationManager.AppSettings["PublishSheets"];
-                if (string.IsNullOrEmpty(val))
-                    throw new Exception("Cannot find 'PublishSheets' in the confg file");
-              
-                var settings = val.Split(',');
-                var ret = new Dictionary<string, string>(settings.Length);
-                for(int i = 0; i < settings.Length; i ++)
-                {
-                    var sheetRange = settings[i].Split('!');
-                    ret[sheetRange[0]] = sheetRange.Length > 1 ? sheetRange[1] : string.Empty;
-                }
+            var val = configSheet.UsedRange.Value2 as object[,];
+            var cols = val.GetLength(1);
+            var rows = val.Length / cols;
 
-                return ret;
+            var reports = new List<ReportConfig>();
+            for (int i = 1; i <= rows; i++)
+            {
+                int rowNumber;
+                var strRowNumber = val[i, RowNumerColumn]?.ToString();
+                if (!int.TryParse(strRowNumber, out rowNumber))
+                    continue;
+
+                reports.Add(new ReportConfig
+                {
+                    ConfigSheet = configSheet,
+                    RowNumber = rowNumber,
+                    ReportName = val[i, ReportNameColumn]?.ToString(),
+                    SheetRange = val[i, SheetRangeColumn]?.ToString(),
+                    FormatterString = val[i, FormatterColumn]?.ToString(),
+                    Interval = Parse(val[i, IntervalColumn]),
+                    DBServer = val[i, DBServerColumn]?.ToString(),
+                    DBName = val[i, DBNameColumn]?.ToString(),
+                    MaxStoredRecords = Parse(val[i, DataPersistenceSecondsColumn]),
+                    InactiveTimeout = Parse(val[i, InactiveTimeoutColumn])
+                });
             }
+
+            return reports.ToArray();
         }
 
+
+        public void PublishStarted(Worksheet configSheet, int countOfRunning)
+        {
+            configSheet.Range[StatusCell].Value2 = $"RUNNING({countOfRunning})...";
+        }
+
+        public void PublishStopped(Worksheet configSheet)
+        {
+            configSheet.Range[StatusCell].Value2 = "Stopped";
+        }
+
+
+        private long? Parse(object val)
+        {
+            if (val == null)
+                return null;
+
+            long longVal;
+            if (!long.TryParse(val.ToString(), out longVal))
+                return null;
+
+            return longVal;
+
+        }
     }
 }

@@ -20,7 +20,7 @@ namespace OpenApi.Cms.TestTools.Client.DB
             _connString = connString;
         }
 
-        public object TestDBCOnnection()
+        public int TestDBConnection(string reportName)
         {
             using (var conn = new SqlConnection(_connString))
             {
@@ -28,10 +28,14 @@ namespace OpenApi.Cms.TestTools.Client.DB
                 {
                     conn.Open();
                     var command = conn.CreateCommand();
-                    command.CommandText = $"SELECT COUNT(row_id) FROM [dbo].[Record]";
+                    command.CommandText = @"SELECT COUNT(row_id) FROM [dbo].[Record] WHERE sheetName=@sheetName";
+                    command.Parameters.Add(new SqlParameter("@sheetName", SqlDbType.NVarChar)
+                    {
+                        Value = reportName
+                    });
                     command.CommandType = CommandType.Text;
                     command.CommandTimeout = 300;
-                    return command.ExecuteScalar();
+                    return (int)command.ExecuteScalar();
                 }
                 catch
                 {
@@ -77,11 +81,19 @@ namespace OpenApi.Cms.TestTools.Client.DB
                         Value = cellData.Columns
                     });
 
-                    var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(cellData.Data));
+                    var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(cellData));
                     command.Parameters.Add(new SqlParameter("@data", SqlDbType.VarBinary)
                     {
                         Value = bytes
                     });
+
+                    if (cellData.MaxStoredRecords.HasValue)
+                    {
+                        command.Parameters.Add(new SqlParameter("@maxStoredRecords", SqlDbType.BigInt)
+                        {
+                            Value = cellData.MaxStoredRecords
+                        });
+                    }
 
                     return (int)command.ExecuteScalar();
                 }

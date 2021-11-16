@@ -18,6 +18,10 @@ namespace Cms.WebPublisher.Models
 
         public object[,] Data { get; set; }
 
+        public string[] Formatter { get; set; }
+
+        public long? InactiveTimeout { get; set; }
+
         public bool HasValue
         {
             get

@@ -9,7 +9,8 @@
           <button id='btnStopSharing' label='Stop Sharing' imageMso='MacroRecorderPause' size='large' onAction='StopPublishPositions'/>
         </group>
         <group id='Group2' label='Check'>
-          <button id='btnCheckDBConnection' label='Test DB' imageMso='OutlineDemoteToBodyText' size='large' onAction='TestDbConnection'/>
+          <button id='btnCheckDBConnection' label='Check DB' imageMso='OutlineDemoteToBodyText' size='large' onAction='TestDbConnection'/>
+          <button id='btnCheckConfigConnection' label='Check Config' imageMso='AcceptInvitation' size='large' onAction='CheckConfig'/>
         </group>
       </tab>
     </tabs>

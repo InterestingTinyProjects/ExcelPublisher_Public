@@ -28,20 +28,6 @@ namespace OpenApi.Cms.TestTools.Client
             }
         }
 
-
-        public int NoPublishWarningThreshold
-        {
-            get
-            {
-                int noPublishThreshold;
-                var val = _config["NoPublishThreshold"];
-                if (!int.TryParse(val, out noPublishThreshold))
-                    return 1000;
-
-                return noPublishThreshold;
-            }
-        }
-
         public string DefaultSheetName
         {
             get
@@ -53,18 +39,5 @@ namespace OpenApi.Cms.TestTools.Client
                 return val;
             }
         }
-
-        public Dictionary<string, string[]> SheetFormatter
-        {
-            get
-            {
-                var dic = _config.GetSection("SheetFormatter").Get<Dictionary<string, string[]>>();
-                if (dic == null)
-                    return new Dictionary<string, string[]>(0);
-
-                return dic;
-            }
-        }
-
     }
 }

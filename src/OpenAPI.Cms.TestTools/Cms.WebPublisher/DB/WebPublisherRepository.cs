@@ -36,18 +36,26 @@ namespace Cms.WebPublisher.DB
                         Value = sheetName
                     });
 
-                    var cellData = new GenericCellData();
+                    GenericCellData cellData = null;
                     var reader = command.ExecuteReader();
                     while (reader.Read())
                     {
+                        var bytes = (byte[])reader["data"];
+                        var json = Encoding.UTF8.GetString(bytes);
+                        cellData = JsonConvert.DeserializeObject<GenericCellData>(json);
+
                         cellData.SheetName = reader["sheetName"].ToString();
                         cellData.Timestamp = (DateTime)reader["publishTime"];
                         cellData.Rows = (int)reader["rows"];
                         cellData.Columns = (int)reader["columns"];
-                        var bytes = (byte[])reader["data"];
-                        var json = Encoding.UTF8.GetString(bytes);
-                        cellData.Data = JsonConvert.DeserializeObject<object[,]>(json);
                     }
+
+                    if (cellData == null)
+                        return new GenericCellData
+                        {
+                            SheetName = $"[{sheetName}] Not Found"
+                        };
+
                     return cellData;
                 }
                 catch
