@@ -48,7 +48,49 @@ namespace OpenApi.Cms.TestTools.Client.DB
             }
         }
 
-       
+
+        public GenericCellData[] GetReportData(string reportName, int topRows)
+        {
+            string spName = "dbo.GetLatestPositions";
+            using (var conn = new SqlConnection(_connString))
+            {
+                try
+                {
+                    conn.Open();
+                    var command = conn.CreateCommand();
+                    command.CommandText = spName;
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.CommandTimeout = 300;
+                    command.Parameters.Add(new SqlParameter("@sheetName", SqlDbType.NVarChar)
+                    {
+                        Value = reportName
+                    });
+
+                    command.Parameters.Add(new SqlParameter("@topCount", SqlDbType.Int)
+                    {
+                        Value = topRows
+                    });
+
+                    command.Parameters.Add(new SqlParameter("@isPercentage", SqlDbType.Bit)
+                    {
+                        Value = false
+                    });
+
+                    var reader = command.ExecuteReader();
+                    return ReadData(reader);
+                }
+                catch
+                {
+                    throw;
+                }
+                finally
+                {
+                    conn.Close();
+                }
+            }
+        }
+
+
         public int PublishPositions(GenericCellData cellData)
         {
             string spName = "dbo.PublishPositions";
@@ -108,6 +150,26 @@ namespace OpenApi.Cms.TestTools.Client.DB
             }
         }
 
+
+
+        private GenericCellData[] ReadData(SqlDataReader reader)
+        {
+            var ret = new List<GenericCellData>();
+            while (reader.Read())
+            {
+                var bytes = (byte[])reader["data"];
+                var json = Encoding.UTF8.GetString(bytes);
+                var cellData = JsonConvert.DeserializeObject<GenericCellData>(json);
+
+                cellData.Timestamp = (DateTime)reader["publishTime"];
+                cellData.Rows = (int)reader["rows"];
+                cellData.Columns = (int)reader["columns"];
+
+                ret.Add(cellData);
+            }
+
+            return ret.ToArray();
+        }
 
     }
 }

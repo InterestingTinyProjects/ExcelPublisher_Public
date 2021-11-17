@@ -31,4 +31,30 @@ namespace OpenApi.Cms.TestTools.Client.Models
         public long? MaxStoredRecords { get; set; }
 
     }
+
+    public static class GenericCellDataExt
+    {
+        public static object ToExcelValue(this GenericCellData[] data)
+        {
+            if (!data.Any())
+                return 0;
+
+            var columns = data.First().Columns + 1;
+            var rows = data.Sum(c => c.Rows);
+            var ret = typeof(object[,]).GetConstructors()[0].Invoke(new object[] { rows, columns }) as object[,];
+            int index = 0;
+            foreach (var cellData in data)
+            {
+                for (int i = 0; i < cellData.Rows; i++)
+                {
+                    ret[index, 0] = cellData.Timestamp;
+                    for (int j = 0; j < cellData.Columns; j++)
+                        ret[index, j + 1] = cellData.Data[i, j];
+                    index ++;
+                }
+            }
+
+            return ret;
+        }
+    }
 }

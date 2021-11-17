@@ -28,6 +28,7 @@ namespace Publisher.ExcelAddin.UI
             if ( _timer != null && _timer.Enabled == true)
                 return;
 
+            _isRunning = false;
             SetTimer();
 
             _timer.Enabled = true;
