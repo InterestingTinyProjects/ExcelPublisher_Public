@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace Publisher.ExcelAddin.Models
 {
+    /// <summary>
+    /// Stores a row in the configuration sheet
+    /// </summary>
     public class ReportConfig
     {
         public Worksheet ConfigSheet { get; set; }

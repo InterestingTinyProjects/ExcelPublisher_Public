@@ -122,7 +122,10 @@ namespace Publisher.ExcelAddin
             }
         }
 
-
+        /// <summary>
+        /// Validate DB setup in the configuration sheet
+        /// </summary>
+        /// <param name="control"></param>
         public void TestDbConnection(IRibbonControl control)
         {
             try
@@ -146,6 +149,10 @@ namespace Publisher.ExcelAddin
             }
         }
 
+        /// <summary>
+        /// Validate the configuration sheet
+        /// </summary>
+        /// <param name="control"></param>
         public void CheckConfig(IRibbonControl control)
         {
             try
