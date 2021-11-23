@@ -87,6 +87,8 @@ namespace Publisher.ExcelAddin.Models
 
         public long? InactiveTimeout { get; set; }
 
+        public string Filename { get; set; }
+
         public string DbConnectionString
         {
             get
@@ -127,6 +129,20 @@ namespace Publisher.ExcelAddin.Models
             }
         }
 
+        public int CountRecords()
+        {
+            var connString = DbConnectionString;
+            try
+            {
+                var repo = new WebPublisherRepository(connString);
+                var records = repo.TestDBConnection(this.ReportName);
+                return records;
+            }
+            catch (Exception ex)
+            {
+                return 0;
+            }
+        }
 
         public bool Validate(StringBuilder message, Application app)
         {
@@ -160,6 +176,10 @@ namespace Publisher.ExcelAddin.Models
             // Check Publish or not
             message.AppendLine($"- Pubish: {this.CanPublish()}");
 
+            if (!string.IsNullOrEmpty(this.Filename))
+            {
+                message.AppendLine($" - Filename OK. {this.Filename}");
+            }
             return true;
         }
     }

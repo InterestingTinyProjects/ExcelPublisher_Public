@@ -56,5 +56,33 @@ namespace OpenApi.Cms.TestTools.Client.Models
 
             return ret;
         }
+        public static string[] ToCsvLines(this GenericCellData[] data)
+        {
+            if (!data.Any())
+                return null;
+
+            var columns = data.First().Columns + 1;
+            var rows = data.Sum(c => c.Rows);
+            string[] lines = new string[rows];
+            int index = 0;
+            foreach (var cellData in data)
+            {
+                //skip the first title line
+                for (int i = 1; i < cellData.Rows; i++)
+                {
+                    StringBuilder sb = new StringBuilder(cellData.Timestamp.ToString("yyyy/MM/dd HH:mm:ss.ffff"));
+                    for (int j = 0; j < cellData.Columns; j++)
+                    {
+                        sb.Append(",");
+                        sb.Append(cellData.Data[i, j]);
+                    }
+                    lines[index] = sb.ToString();
+                    index++;
+                }
+            }
+
+            return lines;
+        }
+
     }
 }

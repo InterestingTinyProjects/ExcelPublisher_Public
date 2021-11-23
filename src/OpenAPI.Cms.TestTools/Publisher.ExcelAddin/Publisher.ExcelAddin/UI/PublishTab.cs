@@ -176,6 +176,71 @@ namespace Publisher.ExcelAddin
             }
         }
 
+
+        /// <summary>
+        /// Save fairs to files
+        /// </summary>
+        /// <param name="control"></param>
+        public void SaveFile(IRibbonControl control)
+        {
+            try
+            {
+                var configSheet = _app.Sheets[_config.ConfigSheetName];
+                var reportConfigs = _config.GetConfigurations(configSheet);
+                foreach (var reportConfig in reportConfigs)
+                {
+                    if (!string.IsNullOrEmpty(reportConfig.Filename))
+                    {
+                        int countRecords = reportConfig.CountRecords();
+                        if (countRecords > 0)
+                        {
+                            string[] lines = Functions.ReportCsvLines(countRecords, reportConfig.ReportName, reportConfig.DBServer, reportConfig.DBName);
+                            WriteLines(lines, reportConfig.Filename);
+                            var repo = new WebPublisherRepository(reportConfig.DbConnectionString);
+                            repo.DeleteReportData(reportConfig.ReportName);
+                            MessageBox.Show($"Saved {countRecords} records in {reportConfig.ReportName} to file.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                PopupWarning($"{ex.Message} - {ex.StackTrace}");
+            }
+        }
+
+        
+        public void WriteLines(string[] lines, string filename)
+        {
+            string currentFile = "";
+            StreamWriter fileSW = null;
+            foreach (string line in lines)
+            {
+                if (String.IsNullOrEmpty(line))
+                    continue;
+                string nonEmptyLine = line.Trim();
+                if (String.IsNullOrEmpty(nonEmptyLine))
+                    continue;
+                string dataStr = nonEmptyLine.Substring(nonEmptyLine.IndexOf(',')).Replace(",", "");
+                // skip lines with empty Excel cells
+                if (String.IsNullOrEmpty(dataStr))
+                    continue;
+
+                string dateStr = nonEmptyLine.Substring(0, nonEmptyLine.IndexOf(' ')).Replace("/", "");
+                string targetFile = filename.Replace("yyyymmdd", dateStr);
+                if (currentFile != targetFile)
+                {
+                    if (fileSW != null)
+                        fileSW.Close();
+                    fileSW = new StreamWriter(targetFile, append: true);
+                    currentFile = targetFile;
+                }
+                fileSW.WriteLine(nonEmptyLine);
+            }
+            if (fileSW != null)
+                fileSW.Close();
+        }
+
         private void PopupWarning(string message)
         {
             MessageBox.Show(message, "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);

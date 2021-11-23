@@ -23,6 +23,7 @@ namespace OpenApi.Cms.TestTools.Client
         private static readonly int DBNameColumn = 9;
         private static readonly int DataPersistenceSecondsColumn = 10;
         private static readonly int InactiveTimeoutColumn = 11;
+        private static readonly int FilenameColumn = 12;
 
         public string ConfigSheetName
         {
@@ -61,7 +62,8 @@ namespace OpenApi.Cms.TestTools.Client
                     DBServer = val[i, DBServerColumn]?.ToString(),
                     DBName = val[i, DBNameColumn]?.ToString(),
                     MaxStoredRecords = Parse(val[i, DataPersistenceSecondsColumn]),
-                    InactiveTimeout = Parse(val[i, InactiveTimeoutColumn])
+                    InactiveTimeout = Parse(val[i, InactiveTimeoutColumn]),
+                    Filename = val[i, FilenameColumn]?.ToString()
                 });
             }
 

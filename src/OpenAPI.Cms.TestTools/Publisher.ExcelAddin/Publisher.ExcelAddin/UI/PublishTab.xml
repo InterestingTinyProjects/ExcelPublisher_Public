@@ -12,6 +12,9 @@
           <button id='btnCheckDBConnection' label='Check DB' imageMso='OutlineDemoteToBodyText' size='large' onAction='TestDbConnection'/>
           <button id='btnCheckConfigConnection' label='Check Config' imageMso='AcceptInvitation' size='large' onAction='CheckConfig'/>
         </group>
+		<group id='Group3' label='Save'>
+			<button id='btnSaveFile' label='Save to File' imageMso='FileSave' size='large' onAction='SaveFile'/>
+		</group>
       </tab>
     </tabs>
   </ribbon>

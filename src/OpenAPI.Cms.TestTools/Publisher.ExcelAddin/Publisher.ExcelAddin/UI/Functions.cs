@@ -28,29 +28,48 @@ namespace Publisher.ExcelAddin.UI
         {
             try
             {
-                if (string.IsNullOrEmpty(reportName))
-                    return null;
-
-                if (takes <= 0)
-                    takes = 1;
-
-                // Load Config
-                var reportConfig = new ReportConfig
-                {
-                    ReportName = reportName,
-                    DBServer = dbServer,
-                    DBName = dbName
-                };
-
-                var repo = new WebPublisherRepository(reportConfig.DbConnectionString);
-                GenericCellData[] data = repo.GetReportData(reportConfig.ReportName, takes);
-
+                GenericCellData[] data = LoadReport(takes, reportName, dbServer, dbName);
                 return data.ToExcelValue();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return $"Error: {ex.Message} {ex.StackTrace}";
             }
+        }
+
+        public static string[] ReportCsvLines(int takes, string reportName, string dbServer, string dbName)
+        {
+            try
+            {
+                GenericCellData[] data = LoadReport(takes, reportName, dbServer, dbName);
+                return data.ToCsvLines();
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        public static GenericCellData[] LoadReport(int takes, string reportName, string dbServer, string dbName)
+        {
+            if (string.IsNullOrEmpty(reportName))
+                return null;
+
+            if (takes <= 0)
+                takes = 1;
+
+            // Load Config
+            var reportConfig = new ReportConfig
+            {
+                ReportName = reportName,
+                DBServer = dbServer,
+                DBName = dbName
+            };
+
+            var repo = new WebPublisherRepository(reportConfig.DbConnectionString);
+            GenericCellData[] data = repo.GetReportData(reportConfig.ReportName, takes);
+
+            return data;
         }
     }
 }

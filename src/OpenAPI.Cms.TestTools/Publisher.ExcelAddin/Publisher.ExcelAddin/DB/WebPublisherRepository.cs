@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace OpenApi.Cms.TestTools.Client.DB
 {
@@ -39,6 +40,35 @@ namespace OpenApi.Cms.TestTools.Client.DB
                 }
                 catch
                 {
+                    throw;
+                }
+                finally
+                {
+                    conn.Close();
+                }
+            }
+        }
+
+        public void DeleteReportData(string reportName)
+        {
+            using (var conn = new SqlConnection(_connString))
+            {
+                try
+                {
+                    conn.Open();
+                    var command = conn.CreateCommand();
+                    command.CommandText = @"DELETE FROM [dbo].[Record] WHERE sheetName=@sheetName";
+                    command.Parameters.Add(new SqlParameter("@sheetName", SqlDbType.NVarChar)
+                    {
+                        Value = reportName
+                    });
+                    command.CommandType = CommandType.Text;
+                    command.CommandTimeout = 60000;
+                    command.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"{ex.Message} - {ex.StackTrace}", "Info", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     throw;
                 }
                 finally
