@@ -11,6 +11,28 @@ namespace Cms.WebPublisher.Services
 {
     public class ContentService
     {
+        /// <summary>
+        /// See https://github.com/Excel-DNA/ExcelDna/blob/661aba734f08b2537866632f2295a77062640672/Source/ExcelDna.Integration/ExcelError.cs
+        /// and https://groups.google.com/g/exceldna/c/Z6mmxJ4LSbM
+        ///     ErrDiv0 = -2146826281
+        ///     ErrNA = -2146826246
+        ///     ErrName = -2146826259
+        ///     ErrNull = -2146826288
+        ///     ErrNum = -2146826252
+        ///     ErrRef = -2146826265
+        ///     ErrValue = -2146826273
+        /// </summary>
+        private static readonly Dictionary<long, string> ExcelErrorValues = new Dictionary<long, string>
+        {
+            {-2146826273, "#Value!" },
+            {-2146826281, "#Div0!" },
+            {-2146826246, "#NA!" },
+            {-2146826259, "#Name!" },
+            {-2146826288, "#Null!" },
+            {-2146826252, "#Num!" },
+            {-2146826265, "#Ref!" },
+        };
+
 
         public SheetView GetSheetView(GenericCellData cellData)
         {
@@ -36,16 +58,27 @@ namespace Cms.WebPublisher.Services
                 {
                     builder.Append("<td>");
 
-                    // The value is a double and there is a formatter
-                    if(genericData.Data[i, j] != null && genericData.Data[i, j].GetType() == typeof(double) &&
-                        genericData.Formatter != null && genericData.Formatter.Length > j)
-                    {
-                        double doubleVal = (double)genericData.Data[i, j];
-                        var format = genericData.Formatter[j];
-                        builder.Append(doubleVal.ToString(format));
-                    }
-                    else
+                    if (genericData.Data[i, j] == null)
                         builder.Append(genericData.Data[i, j]);
+                    else 
+                    {
+                        // Show pre-set texts first
+                        string presetCelValue = null;
+                        if ((genericData.Data[i, j] is long || genericData.Data[i, j] is int)
+                            && ExcelErrorValues.TryGetValue((long)genericData.Data[i, j], out presetCelValue))
+                            builder.Append(presetCelValue);                     
+                        else if ( genericData.Data[i, j] is double &&
+                            genericData.Formatter != null && 
+                            genericData.Formatter.Length > j)
+                        {
+                            // The value is a double and there is a formatter
+                            double doubleVal = (double)genericData.Data[i, j];
+                            var format = genericData.Formatter[j];
+                            builder.Append(doubleVal.ToString(format));
+                        }
+                        else 
+                            builder.Append(genericData.Data[i, j]);
+                    }
 
                     builder.Append("</td>");
                 }
