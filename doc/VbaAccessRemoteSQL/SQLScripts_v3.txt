@@ -1,0 +1,20 @@
+// Add user to the server 
+
+USE [master]
+GO
+
+CREATE LOGIN [webpublisher] WITH PASSWORD=N'12345', DEFAULT_DATABASE=[WebPublisher], CHECK_EXPIRATION=OFF, CHECK_POLICY=ON
+GO
+
+ALTER LOGIN [webpublisher] DISABLE
+GO
+
+ALTER SERVER ROLE [sysadmin] ADD MEMBER [webpublisher]
+GO
+
+ALTER LOGIN [webpublisher] ENABLE
+GO
+
+
+
+
