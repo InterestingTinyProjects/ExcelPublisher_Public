@@ -12,5 +12,14 @@ namespace Cms.WebPublisher.Models
         public string HtmlView { get; set; }
 
         public string WarningView { get; set; }
+
+        public bool HasWarning
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(WarningView);
+            }
+        }
+
     }
 }

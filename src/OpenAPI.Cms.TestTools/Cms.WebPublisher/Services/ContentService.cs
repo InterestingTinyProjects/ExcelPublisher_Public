@@ -48,7 +48,7 @@ namespace Cms.WebPublisher.Services
         private string GetHtmlView(GenericCellData genericData)
         {
             var builder = new StringBuilder();
-            builder.Append($"<p><small class=\"text-muted text-center s-publishTime\" data-publishTime=\"{genericData.Timestamp.ToString("yyyy -MM-dd HH:mm:ss")}\">Publish Time: {genericData.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")}</p>");
+            builder.Append($"<p class=\"text-muted text-center s-publishTime\" data-publishTime=\"{genericData.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")}\">Publish Time: {genericData.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")}</p>");
             builder.Append("<p><table class=\"table\">");
             builder.Append("<tbody>");
             for (int i = 0; i < genericData.Rows; i++)
@@ -100,10 +100,13 @@ namespace Cms.WebPublisher.Services
                 return string.Empty;
 
             // Return warning
-            return @"<div class='alert alert-warning d - flex align - items - center' role='alert'>
-                        <i class='bi bi-patch-exclamation'>
-                            It has been too long since the last publish.
-                        </i>
+            return @$"<div class='alert alert-warning text-center border border-warning' role='alert'>
+                        <blockquote class='blockquote'>
+                            <i class='bi bi-patch-exclamation'>
+                                It has been too long since the last publish.
+                            </i>
+                        </blockquote>
+                            Last Publish Time: {data.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")}
                     </div>";
         }
     }

@@ -59,7 +59,8 @@ namespace Cms.WebPublisher
                     var sheetView = _service.GetSheetView(data);
                     var page = File.ReadAllText(templatePath)
                                     .Replace("{{SheetName}}", sheetView.SheetName)
-                                    .Replace("{{Content}}", sheetView.WarningView + sheetView.HtmlView);
+                                    .Replace("{{Warning}}", sheetView.WarningView)
+                                    .Replace("{{Content}}", sheetView.HtmlView);
 
                     await context.Response.WriteAsync(page);
                 });
