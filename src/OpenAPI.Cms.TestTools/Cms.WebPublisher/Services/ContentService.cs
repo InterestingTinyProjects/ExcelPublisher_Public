@@ -56,7 +56,14 @@ namespace Cms.WebPublisher.Services
                 builder.Append("<tr>");
                 for (int j = 0; j < genericData.Columns; j++)
                 {
-                    builder.Append("<td>");
+                    var formtatter = string.Empty;
+                    if (genericData.Formatter != null && genericData.Formatter.Length > j)
+                        formtatter = genericData.Formatter[j];
+
+                    builder.Append("<td");
+                    if(formtatter == "P" || formtatter.StartsWith("f"))
+                        builder.Append(" class=\"s-td-number\"");
+                    builder.Append(">");
 
                     if (genericData.Data[i, j] == null)
                         builder.Append(genericData.Data[i, j]); 
@@ -67,9 +74,7 @@ namespace Cms.WebPublisher.Services
                         if ((genericData.Data[i, j] is long || genericData.Data[i, j] is int)
                             && ExcelErrorValues.TryGetValue((long)genericData.Data[i, j], out presetCelValue))
                             builder.Append(presetCelValue);                     
-                        else if ( genericData.Data[i, j] is double &&
-                            genericData.Formatter != null && 
-                            genericData.Formatter.Length > j)
+                        else if ( genericData.Data[i, j] is double && !string.IsNullOrEmpty(formtatter))
                         {
                             // The value is a double and there is a formatter
                             double doubleVal = (double)genericData.Data[i, j];

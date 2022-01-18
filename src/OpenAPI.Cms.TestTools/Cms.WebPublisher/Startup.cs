@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Cms.WebPublisher
@@ -57,12 +58,12 @@ namespace Cms.WebPublisher
                     var templatePath = Path.Combine(env.ContentRootPath, "Pages", "Publish.html");
                     var data = LoadPositions(config.WebPublisherDB, sheetName);
                     var sheetView = _service.GetSheetView(data);
-                    var page = File.ReadAllText(templatePath)
-                                    .Replace("{{SheetName}}", sheetView.SheetName)
-                                    .Replace("{{Warning}}", sheetView.WarningView)
-                                    .Replace("{{Content}}", sheetView.HtmlView);
+                    var page = new StringBuilder(File.ReadAllText(templatePath))
+                                                .Replace("{{SheetName}}", sheetView.SheetName)
+                                                .Replace("{{Warning}}", sheetView.WarningView)
+                                                .Replace("{{Content}}", sheetView.HtmlView);
 
-                    await context.Response.WriteAsync(page);
+                    await context.Response.WriteAsync(page.ToString());
                 });
 
                 endpoints.MapGet("/sheets", async context =>

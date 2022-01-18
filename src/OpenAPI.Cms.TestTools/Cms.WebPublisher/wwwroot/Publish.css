@@ -22,6 +22,15 @@ a.s-sheetname {
     color: #8a6d3b;
 }
 
+div.card-table table tr td.s-td-number {
+    text-align: right;
+}
+
+div.card-table table tr:nth-child(1) td {
+    text-align: center;
+    font-weight: bold;
+}
+
 div.card-table tr:nth-child(3) {
     background-color: #f2dede;
 }
