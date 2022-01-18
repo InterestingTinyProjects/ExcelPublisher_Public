@@ -49,7 +49,7 @@ namespace Cms.WebPublisher.Services
         {
             var builder = new StringBuilder();
             builder.Append($"<p class=\"text-muted text-center s-publishTime\" data-publishTime=\"{genericData.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")}\">Publish Time: {genericData.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")}</p>");
-            builder.Append("<p><table class=\"table\">");
+            builder.Append("<p><table class=\"table table-striped table-bordered\">");
             builder.Append("<tbody>");
             for (int i = 0; i < genericData.Rows; i++)
             {
@@ -59,7 +59,7 @@ namespace Cms.WebPublisher.Services
                     builder.Append("<td>");
 
                     if (genericData.Data[i, j] == null)
-                        builder.Append(genericData.Data[i, j]);
+                        builder.Append(genericData.Data[i, j]); 
                     else 
                     {
                         // Show pre-set texts first

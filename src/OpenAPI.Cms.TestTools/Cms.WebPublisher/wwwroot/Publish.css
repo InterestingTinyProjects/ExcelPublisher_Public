@@ -2,3 +2,31 @@
     max-width: 98%;
     overflow-x: scroll;
 }
+
+table tbody td {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+table tbody tr:hover {
+    background-color: lightgray !important;
+    cursor: pointer;
+}
+
+a.s-sheetname {
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif
+}
+
+#root div.s-warning table.table-striped tr:nth-child(odd) {
+    background-color: #fcf8e3;
+    color: #8a6d3b;
+}
+
+div.card-table tr:nth-child(3) {
+    background-color: #f2dede;
+}
+
+
+div.card-table tr:nth-child(3) td {
+    color: #a94442;
+}
