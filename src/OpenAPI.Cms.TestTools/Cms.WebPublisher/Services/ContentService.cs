@@ -90,7 +90,6 @@ namespace Cms.WebPublisher.Services
                         else 
                             builder.Append(genericData.Data[i, j]);
                     }
-
                     builder.Append("</td>");
                 }
                 builder.Append("</tr>");

@@ -79,20 +79,23 @@
             $.ajax({
                 url: "sheets?sheetName={{SheetName}}",
                 success: function (result) {
+                    // Show table
                     $("a.s-sheetname").text(result.SheetName);
                     $("div.s-warning").html(result.WarningView);
                     $("div.s-publishedContent").html(result.HtmlView);
 
+                    // Alter rows
                     $($("td .s-alert").parents("tr")).addClass('s-alert');
 
-                    //if (result.HasWarning) {
-                    //    $('nav.bg-success').addClass('bg-danger');
-                    //    $("div.s-publishedContent").addClass('s-warning');
-                    //}
-                    //else {
-                    //    $('nav.bg-danger').addClass('bg-success');
-                    //    $("div.s-publishedContent").removeClass('s-warning');
-                    //}
+                    // Change theme according to warn or not
+                    if (result.HasWarning) {
+                        $('nav').addClass('bg-danger').removeClass('bg-success');
+                        $("div.s-publishedContent").addClass('s-warning');
+                    }
+                    else {
+                        $('nav').addClass('bg-success').removeClass('bg-danger');
+                        $("div.s-publishedContent").removeClass('s-warning');
+                    }
                 },
                 error: function (err) {
                     console.log(err.status + ' ' + err.responseText);
