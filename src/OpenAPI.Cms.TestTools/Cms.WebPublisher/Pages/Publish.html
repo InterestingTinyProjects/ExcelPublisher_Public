@@ -83,6 +83,8 @@
                     $("div.s-warning").html(result.WarningView);
                     $("div.s-publishedContent").html(result.HtmlView);
 
+                    $($("td .s-alert").parents("tr")).addClass('s-alert');
+
                     //if (result.HasWarning) {
                     //    $('nav.bg-success').addClass('bg-danger');
                     //    $("div.s-publishedContent").addClass('s-warning');

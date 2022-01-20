@@ -31,11 +31,11 @@ div.card-table table tr:nth-child(1) td {
     font-weight: bold;
 }
 
-div.card-table tr:nth-child(3) {
-    background-color: #f2dede;
+div.card-table tr.s-alert {
+    background-color: #f2dede !important;
 }
 
-
-div.card-table tr:nth-child(3) td {
+div.card-table tr.s-alert td {
     color: #a94442 !important;
 }
+

@@ -82,6 +82,11 @@ namespace Cms.WebPublisher.Services
                             var format = genericData.Formatter[j];
                             builder.Append(doubleVal.ToString(format));
                         }
+                        else if( formtatter.Equals("alert", StringComparison.OrdinalIgnoreCase) &&
+                                 bool.TrueString.Equals(genericData.Data[i, j].ToString(), StringComparison.OrdinalIgnoreCase))
+                        {
+                            builder.Append($"<b class=\"s-alert\">{genericData.Data[i, j]}</b>");
+                        }
                         else 
                             builder.Append(genericData.Data[i, j]);
                     }
