@@ -81,7 +81,21 @@ namespace Cms.WebPublisher
                     await context.Response.WriteAsync(json);
                 });
 
-                endpoints.MapGet("/error", async context =>
+               endpoints.MapGet("/sheets/formatter", async context =>
+               {
+
+                   var sheetName = context.Request.Query["SheetName"];
+                   if (string.IsNullOrEmpty(sheetName))
+                       sheetName = config.DefaultSheetName;
+
+                    // Get table view
+                    var data = LoadPositions(config.WebPublisherDB, sheetName);
+                   var json = JsonConvert.SerializeObject(data.Formatter, Formatting.Indented);
+                   context.Response.ContentType = "application/json";
+                   await context.Response.WriteAsync(json);
+               });
+
+               endpoints.MapGet("/error", async context =>
                 {
                     context.Response.ContentType = "text/html";
                     Exception ex = context.Features.Get<IExceptionHandlerPathFeature>().Error;
@@ -99,12 +113,7 @@ namespace Cms.WebPublisher
         private GenericCellData LoadPositions(string dbConnection, string sheetName)
         {
             var repo = new WebPublisherRepository(dbConnection);
-
             return repo.GetLatestPositions(sheetName);
-
-            //var filePath = Path.Combine(rootPath, "Files", "Positions.json");
-            //var content = File.ReadAllText(filePath);
-            //return JsonConvert.DeserializeObject<GenericCellData>(content);
         }
     }
 }

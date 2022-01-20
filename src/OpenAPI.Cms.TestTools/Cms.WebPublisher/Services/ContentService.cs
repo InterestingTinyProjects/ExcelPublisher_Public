@@ -56,15 +56,16 @@ namespace Cms.WebPublisher.Services
                 builder.Append("<tr>");
                 for (int j = 0; j < genericData.Columns; j++)
                 {
+                    // Get Formatter
                     var formtatter = string.Empty;
                     if (genericData.Formatter != null && genericData.Formatter.Length > j)
                         formtatter = genericData.Formatter[j];
 
-                    builder.Append("<td");
-                    if(formtatter == "P" || formtatter.StartsWith("f"))
-                        builder.Append(" class=\"s-td-number\"");
-                    builder.Append(">");
+                    // Handle <td> tag by formatter
+                    if (!HandleCellFormat(builder, formtatter))
+                        continue;
 
+                    // Handle values in <td>
                     if (genericData.Data[i, j] == null)
                         builder.Append(genericData.Data[i, j]); 
                     else 
@@ -94,6 +95,27 @@ namespace Cms.WebPublisher.Services
 
             return builder.ToString();
         }
+
+        /// <summary>
+        /// Generate <td> according to formtter
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="formtatter"></param>
+        /// <returns>true - add a td to the table; false - ignore the td</returns>
+        private bool HandleCellFormat(StringBuilder builder, string formtatter)
+        {
+            // Handle Formatter
+            if (formtatter == "P" || formtatter.StartsWith("f"))
+                builder.Append("<td class=\"s-td-number\">");
+            else if (formtatter.Equals("hidden", StringComparison.OrdinalIgnoreCase))
+                return false;
+            else
+                builder.Append("<td>");
+
+            return true;
+        }
+
+
 
         private string GetNoPublishWarningView(GenericCellData data)
         {

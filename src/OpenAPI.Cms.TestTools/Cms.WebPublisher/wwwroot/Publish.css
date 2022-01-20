@@ -37,5 +37,5 @@ div.card-table tr:nth-child(3) {
 
 
 div.card-table tr:nth-child(3) td {
-    color: #a94442;
+    color: #a94442 !important;
 }
