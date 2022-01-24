@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Cms.WebPublisher
@@ -23,7 +24,6 @@ namespace Cms.WebPublisher
     {
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
-
         private ContentService _service = new ContentService();
 
         public void ConfigureServices(IServiceCollection services)
@@ -68,17 +68,32 @@ namespace Cms.WebPublisher
 
                 endpoints.MapGet("/sheets", async context =>
                 {
-                    var sheetName = context.Request.Query["SheetName"];
-                    if (string.IsNullOrEmpty(sheetName))
-                        sheetName = config.DefaultSheetName;
+                    try
+                    {
+                        // Get input parameter
+                        var sheetName = context.Request.Query["SheetName"];
+                        if (string.IsNullOrEmpty(sheetName))
+                            sheetName = config.DefaultSheetName;
 
-                    // Get table view
-                    var data = LoadPositions(config.WebPublisherDB, sheetName);
-                    var sheetView = _service.GetSheetView(data);
+                        // Get filter parameter
+                        var filter = context.Request.Query["filter"];
+                        if (string.IsNullOrEmpty(filter))
+                            filter = string.Empty;
 
-                    var json = JsonConvert.SerializeObject(sheetView);
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync(json);
+                        // Get table view
+                        var data = LoadPositions(config.WebPublisherDB, sheetName);
+                        var sheetView = _service.GetSheetView(data, filter);
+
+                        var json = JsonConvert.SerializeObject(sheetView);
+                        context.Response.ContentType = "application/json";
+                        await context.Response.WriteAsync(json);
+                    }
+                    catch(Exception ex)
+                    {
+                        var json = JsonConvert.SerializeObject(ex);
+                        context.Response.ContentType = "application/json";
+                        await context.Response.WriteAsync(json);
+                    }
                 });
 
                endpoints.MapGet("/sheets/formatter", async context =>
@@ -88,8 +103,8 @@ namespace Cms.WebPublisher
                    if (string.IsNullOrEmpty(sheetName))
                        sheetName = config.DefaultSheetName;
 
-                    // Get table view
-                    var data = LoadPositions(config.WebPublisherDB, sheetName);
+                   // Get table view
+                   var data = LoadPositions(config.WebPublisherDB, sheetName);
                    var json = JsonConvert.SerializeObject(data.Formatter, Formatting.Indented);
                    context.Response.ContentType = "application/json";
                    await context.Response.WriteAsync(json);

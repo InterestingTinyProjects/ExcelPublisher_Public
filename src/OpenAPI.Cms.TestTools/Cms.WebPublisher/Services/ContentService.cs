@@ -34,62 +34,49 @@ namespace Cms.WebPublisher.Services
         };
 
 
-        public SheetView GetSheetView(GenericCellData cellData)
+        public SheetView GetSheetView(GenericCellData cellData, string filter = "")
         {
             return new SheetView
             {
                 SheetName = cellData.SheetName,
-                HtmlView = GetHtmlView(cellData),
+                HtmlView = GetHtmlView(cellData, filter),
                 WarningView = GetNoPublishWarningView(cellData)
             };
         }
 
 
-        private string GetHtmlView(GenericCellData genericData)
+        private string GetHtmlView(GenericCellData genericData, string filter)
         {
             var builder = new StringBuilder();
-            builder.Append($"<p class=\"text-muted text-center s-publishTime\" data-publishTime=\"{genericData.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")}\">Publish Time: {genericData.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")}</p>");
+            builder.Append($"<p class=\"text-muted text-center s-publishTime\" data-publishTime=\"{genericData.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.f")}\">Publish Time: {genericData.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.f")}</p>");
             builder.Append("<p><table class=\"table table-striped table-bordered\">");
             builder.Append("<tbody>");
             for (int i = 0; i < genericData.Rows; i++)
             {
+                // Get texts to be shown in a table row
+                var texts = GetRowTexts(genericData, i);
+
+                // Apply filter
+                if ( i > 0 
+                    && !string.IsNullOrEmpty(filter)
+                    && !texts.Any( t => t is string && ((string)t).Contains(filter)))
+                    continue;
+
+                // Generate html for a table row
                 builder.Append("<tr>");
                 for (int j = 0; j < genericData.Columns; j++)
                 {
                     // Get Formatter
-                    var formtatter = string.Empty;
+                    var formatter = string.Empty;
                     if (genericData.Formatter != null && genericData.Formatter.Length > j)
-                        formtatter = genericData.Formatter[j];
+                        formatter = genericData.Formatter[j];
 
                     // Handle <td> tag by formatter
-                    if (!HandleCellFormat(builder, formtatter))
+                    if (!HandleCellFormat(builder, formatter))
                         continue;
 
-                    // Handle values in <td>
-                    if (genericData.Data[i, j] == null)
-                        builder.Append(genericData.Data[i, j]); 
-                    else 
-                    {
-                        // Show pre-set texts first
-                        string presetCelValue = null;
-                        if ((genericData.Data[i, j] is long || genericData.Data[i, j] is int)
-                            && ExcelErrorValues.TryGetValue((long)genericData.Data[i, j], out presetCelValue))
-                            builder.Append(presetCelValue);                     
-                        else if ( genericData.Data[i, j] is double && !string.IsNullOrEmpty(formtatter))
-                        {
-                            // The value is a double and there is a formatter
-                            double doubleVal = (double)genericData.Data[i, j];
-                            var format = genericData.Formatter[j];
-                            builder.Append(doubleVal.ToString(format));
-                        }
-                        else if( formtatter.Equals("alert", StringComparison.OrdinalIgnoreCase) &&
-                                 bool.TrueString.Equals(genericData.Data[i, j].ToString(), StringComparison.OrdinalIgnoreCase))
-                        {
-                            builder.Append($"<b class=\"s-alert\">{genericData.Data[i, j]}</b>");
-                        }
-                        else 
-                            builder.Append(genericData.Data[i, j]);
-                    }
+                    // Show TD
+                    HandleCellText(builder, formatter, texts, j);
                     builder.Append("</td>");
                 }
                 builder.Append("</tr>");
@@ -98,6 +85,37 @@ namespace Cms.WebPublisher.Services
             builder.Append("</table></p>");
 
             return builder.ToString();
+        }
+
+        private object[] GetRowTexts(GenericCellData genericData, int rowIndex)
+        {
+            var rowTexts = new object[genericData.Columns];
+            for (int j = 0; j < genericData.Columns; j++)
+            {
+                // Get formatter
+                var formatter = string.Empty;
+                if (genericData.Formatter != null && genericData.Formatter.Length > j)
+                    formatter = genericData.Formatter[j];
+
+                // Frmat Error Values
+                string presetCelValue = null;
+                if (genericData.Data[rowIndex, j] != null
+                    && (genericData.Data[rowIndex, j] is long || genericData.Data[rowIndex, j] is int)
+                    && ExcelErrorValues.TryGetValue((long)genericData.Data[rowIndex, j], out presetCelValue))
+                    rowTexts[j] = presetCelValue;
+                // Format Numbers
+                else if (genericData.Data[rowIndex, j] != null
+                         && genericData.Data[rowIndex, j] is double
+                         && !string.IsNullOrEmpty(formatter))
+                {
+                    double doubleVal = (double)genericData.Data[rowIndex, j];
+                    rowTexts[j] = doubleVal.ToString(formatter);
+                }
+                else
+                    rowTexts[j] = genericData.Data[rowIndex, j];
+            }
+
+            return rowTexts;
         }
 
         /// <summary>
@@ -119,6 +137,24 @@ namespace Cms.WebPublisher.Services
             return true;
         }
 
+        /// <summary>
+        /// Generate content of a <td>
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="formatter"></param>
+        /// <param name="texts"></param>
+        /// <param name="index"></param>
+        private void HandleCellText(StringBuilder builder, string formatter, object[] texts, int index)
+        {
+            if (texts[index] != null
+                && formatter.Equals("alert", StringComparison.OrdinalIgnoreCase)
+                && texts[index] != null
+                && bool.TrueString.Equals(texts[index].ToString(), StringComparison.OrdinalIgnoreCase))
+                builder.Append($"<b class=\"s-alert\">{texts[index]}</b>");
+            else
+                builder.Append(texts[index]);
+        }
+
 
 
         private string GetNoPublishWarningView(GenericCellData data)
@@ -137,7 +173,7 @@ namespace Cms.WebPublisher.Services
                                 It has been too long since the last publish.
                             </i>
                         </blockquote>
-                            Last Publish Time: {data.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")}
+                            Last Publish Time: {data.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.ff")}
                     </div>";
         }
     }

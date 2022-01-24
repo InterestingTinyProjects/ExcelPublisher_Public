@@ -46,7 +46,7 @@
             <div class="card card-primary border-success shadow p-3 mb-5 bg-body rounded">
                 <div class="fixed-table-toolbar">
                     <div class="search btn-group" style="float:right !important">
-                        <input class="form-control search-input col-auto" type="search" placeholder="Filter" autocomplete="off">
+                        <input id="txtFilter" class="form-control search-input col-auto" type="search" placeholder="Filter" autocomplete="off">
                     </div>
                 </div>
                 <div class="card-body">
@@ -57,7 +57,7 @@
             </div>
         </div>
 
-        <footer class="footer text-center"> ©2022</footer>
+        <footer class="footer text-center"> </footer>
     </div>
 
     <script type="text/javascript" src="https://momentjs.com/downloads/moment.min.js"></script>
@@ -70,14 +70,17 @@
 
         $(document).ready(function () {
             document.title = $('a.s-sheetname').text();
+            $('#lblLastSyncTime').text(moment().format('HH:mm:ss.S'));
         });
 
         function publishPositions() {
-            console.log('Start retriving positions...');
+            console.log('Start retriving...');
             $('#lblLastSyncTime').text(moment().format('HH:mm:ss.S'));
 
+            var remoteUrl = "sheets?sheetName={{SheetName}}&filter=" + $('#txtFilter').val();
+
             $.ajax({
-                url: "sheets?sheetName={{SheetName}}",
+                url: encodeURI(remoteUrl),
                 success: function (result) {
                     // Show table
                     $("a.s-sheetname").text(result.SheetName);
@@ -98,7 +101,7 @@
                     }
                 },
                 error: function (err) {
-                    console.log(err.status + ' ' + err.responseText);
+                    console.log(err);
                 }
             });
         }

@@ -30,7 +30,7 @@ namespace Cms.WebPublisher.DB
                     var command = conn.CreateCommand();
                     command.CommandText = spName;
                     command.CommandType = CommandType.StoredProcedure;
-                    command.CommandTimeout = 300;
+                    command.CommandTimeout = 5000;  // Increase max waiting time to avoid timeout
                     command.Parameters.Add(new SqlParameter("@sheetName", SqlDbType.NVarChar)
                     {
                         Value = sheetName
