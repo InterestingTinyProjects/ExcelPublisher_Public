@@ -77,7 +77,7 @@
     <None Include="SQLScripts_v3.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="SQLScripts_v4_PerfOfGet.txt">
+    <None Include="SQLScripts_v4_QueryPerf.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
