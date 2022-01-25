@@ -22,7 +22,6 @@ div.card-table table tr:nth-child(1) td {
     text-align: center;
     font-weight: bold;
 }
-
   
 div.card-table table tr td.s-td-number {
     text-align: right;
@@ -49,3 +48,11 @@ div.card-table tr.s-alert td {
     font-weight: bold;
 }
 
+/*.bg-success {
+    background-color: #144c7c !important;
+    background-color: #0374b8 !important;
+}
+
+.border-success {
+    border-color: #144c7c !important;
+}*/

@@ -64,14 +64,14 @@
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://unpkg.com/bootstrap-table@1.19.1/dist/bootstrap-table.min.js"></script>
     <script type="text/javascript">
-        window.setInterval(function () {
-            setTimeout(publishPositions, 0);
-        }, 300);
-
         $(document).ready(function () {
             document.title = $('a.s-sheetname').text();
             $('#lblLastSyncTime').text(moment().format('HH:mm:ss.S'));
         });
+
+        window.setInterval(function () {
+            setTimeout(publishPositions, 0);
+        }, 300);
 
         function publishPositions() {
             console.log('Start retriving...');
