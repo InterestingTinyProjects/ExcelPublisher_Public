@@ -1,0 +1,57 @@
+DROP INDEX [INX_Record_SheetName_PublishTime] ON [dbo].[Record]
+GO
+
+
+/****** Object:  Index [INX_Record_SheetName_PublishTime]    Script Date: 2022/1/24 12:55:24 ******/
+CREATE NONCLUSTERED INDEX [INX_Record_SheetName_PublishTime] ON [dbo].[Record]
+(
+	[sheetName] ASC,
+	[publishTime] DESC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+
+
+
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[GetLatestPositions]
+	@sheetName NVARCHAR(150),
+	@topCount INT = 1,
+	@isPercentage BIT = 0
+AS
+BEGIN
+
+IF @topCount < 0 
+BEGIN 
+	SET @topCount = 0
+END
+
+IF @isPercentage = 0 
+BEGIN
+	SELECT TOP (@topCount) [publishTime],
+			r.[sheetName],
+			[rows],
+			[columns],
+			[data]
+	FROM [dbo].[Record] r WITH(INDEX(INX_Record_SheetName_PublishTime))
+	WHERE sheetName = @sheetName
+	ORDER BY publishTime DESC
+END
+ELSE
+BEGIN
+	SELECT TOP (@topCount) PERCENT [publishTime],
+			r.[sheetName],
+			[rows],
+			[columns],
+			[data]
+	FROM [dbo].[Record] r WITH(INDEX(INX_Record_SheetName_PublishTime))
+	WHERE sheetName = @sheetName
+	ORDER BY publishTime DESC
+END
+
+END
+GO
+
