@@ -5,6 +5,7 @@
 Releases/
 **/bin/
 **/.vs/
+PrivateDoc/
 src/**/bin/
 src/**/.vs/
 Source/**/bin/

@@ -1,0 +1,33 @@
+﻿/* set the style of stock name for Cancel now*/
+div.card-table tr.s-alert-cancel-now td:nth-child(7) {
+    background-color: #fcf8e3 !important;
+    font-weight: bolder !important;
+}
+
+/* set the style of Bid for Bid with*/
+div.card-table tr.s-alert-bid-with td:nth-child(8) {
+    font-weight: bolder !important;
+    color: red !important;
+}
+
+/* set the style of Bid for Bid now*/
+div.card-table tr.s-alert-bid-now td:nth-child(8) {
+    background-color: mistyrose !important;
+    font-weight: bolder !important;
+    color: red !important;
+}
+
+/* set the style of Ask for Ask with*/
+div.card-table tr.s-alert-ask-with td:nth-child(9) {
+    font-weight: bolder !important;
+    color: rgb(8,163,69) !important;
+}
+
+/* set the style of Ask for Ask now*/
+div.card-table tr.s-alert-ask-now td:nth-child(9) {
+    background-color: greenyellow !important;
+    font-weight: bolder !important;
+    color: rgb(8,163,69) !important;
+}
+
+

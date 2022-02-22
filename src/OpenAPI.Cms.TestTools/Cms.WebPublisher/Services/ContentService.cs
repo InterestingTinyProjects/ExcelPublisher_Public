@@ -1,9 +1,11 @@
-﻿using Cms.WebPublisher.Models;
+﻿using Cms.WebPublisher.Formatters;
+using Cms.WebPublisher.Models;
 using OpenApi.Cms.TestTools.Client;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -33,6 +35,18 @@ namespace Cms.WebPublisher.Services
             {-2146826265, "#Ref!" },
         };
 
+        /// <summary>
+        /// Alert styles to table row
+        /// </summary>
+        private static readonly IAlertRowFormatter[] AltertFormatters = new IAlertRowFormatter[]
+        {
+            new TrueFalseAltertRowFormatter("Cancel n", () => "s-alert-cancel-now"),
+            new TrueFalseAltertRowFormatter("Bid n", () => "s-alert-bid-now"),
+            new TrueFalseAltertRowFormatter("Bid w", () => "s-alert-bid-with"),
+            new TrueFalseAltertRowFormatter("Ask n", () => "s-alert-ask-now"),
+            new TrueFalseAltertRowFormatter("Ask w", () => "s-alert-ask-with"),
+        };
+
 
         public SheetView GetSheetView(GenericCellData cellData, string filter = "")
         {
@@ -51,10 +65,13 @@ namespace Cms.WebPublisher.Services
             builder.Append($"<p class=\"text-muted text-center s-publishTime\" data-publishTime=\"{genericData.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.f")}\">Publish Time: {genericData.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.f")}</p>");
             builder.Append("<p><table class=\"table table-striped table-bordered\">");
             builder.Append("<tbody>");
+            string[] headers = null;
             for (int i = 0; i < genericData.Rows; i++)
             {
                 // Get texts to be shown in a table row
                 var texts = GetRowTexts(genericData, i);
+                if (i == 0)
+                    headers = texts.Select( h => h == null? string.Empty : h.ToString()).ToArray();
 
                 // Apply filter
                 if ( i > 0 
@@ -63,7 +80,9 @@ namespace Cms.WebPublisher.Services
                     continue;
 
                 // Generate html for a table row
-                builder.Append("<tr>");
+                builder.Append("<tr");
+                HandleRowFormatters(builder, texts, headers);
+                builder.Append(">");
                 for (int j = 0; j < genericData.Columns; j++)
                 {
                     // Get Formatter
@@ -87,6 +106,31 @@ namespace Cms.WebPublisher.Services
             return builder.ToString();
         }
 
+        /// <summary>
+        /// Add alert style to each row
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="cellTexts"></param>
+        /// <param name="headers"></param>
+        private void HandleRowFormatters(StringBuilder builder, object[] cellTexts, string[] headers)
+        {
+            var alterts = AltertFormatters.Where(f => f.ShouldApply(cellTexts, headers));
+            if(alterts.Any())
+            {
+                builder.Append(" class='");
+                foreach (var alert in alterts)
+                    builder.Append($" {alert.Apply(cellTexts, headers)}");
+
+                builder.Append("'");
+            }
+        }
+
+        /// <summary>
+        /// Return the array containing cell values
+        /// </summary>
+        /// <param name="genericData"></param>
+        /// <param name="rowIndex"></param>
+        /// <returns></returns>
         private object[] GetRowTexts(GenericCellData genericData, int rowIndex)
         {
             var rowTexts = new object[genericData.Columns];
@@ -97,7 +141,7 @@ namespace Cms.WebPublisher.Services
                 if (genericData.Formatter != null && genericData.Formatter.Length > j)
                     formatter = genericData.Formatter[j];
 
-                // Frmat Error Values
+                // Format Error Values
                 string presetCelValue = null;
                 if (genericData.Data[rowIndex, j] != null
                     && (genericData.Data[rowIndex, j] is long || genericData.Data[rowIndex, j] is int)
@@ -156,7 +200,11 @@ namespace Cms.WebPublisher.Services
         }
 
 
-
+        /// <summary>
+        /// Show warning
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         private string GetNoPublishWarningView(GenericCellData data)
         {
             if (!data.InactiveTimeout.HasValue)

@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.6.1/font/bootstrap-icons.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="/Publish.css" rel="stylesheet" />
+    <link href="/Positions.css" rel="stylesheet" />
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-success fixed-top">
@@ -34,8 +35,8 @@
         </div>
     </nav>
 
-    <div id="root" class="container-fluid" style="margin-top: 120px;">
-        <div class="container">
+    <div id="root" class="container-fluid" style="margin-top: 100px;">
+        <div class="container p-1">
             <div class="s-warning shadow-lg">
                 {{Warning}}
             </div>
@@ -43,13 +44,17 @@
         </div>
         
         <div class="content-page">
-            <div class="card card-primary border-success shadow p-3 mb-5 bg-body rounded">
+            <div class="card card-primary border-success shadow p-1 mb-5 bg-body rounded">
                 <div class="fixed-table-toolbar">
-                    <div class="search btn-group" style="float:right !important">
-                        <input id="txtFilter" class="form-control search-input col-auto" type="search" placeholder="Filter" autocomplete="off">
+                    <div class="search button-group" style="float:right !important">
+                        <div class="input-group">
+                            <button id="btnScrollLeft" type="button" title="Scroll the table to left" class="input-group-text col-auto">&lt;</button>
+                            <button id="btnScrollRight" type="button" title="Scroll the table to right" class="input-group-text col-auto">&gt;</button>
+                            <input id="txtFilter" class="form-control search-input col-auto" type="text" placeholder="Filter" autocomplete="off">
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-1">
                     <div class="card-table table-responsive s-publishedContent">
                         {{Content}}
                     </div>
@@ -60,12 +65,23 @@
         <footer class="footer text-center"> </footer>
     </div>
 
-    <script type="text/javascript" src="https://momentjs.com/downloads/moment.min.js"></script>
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="https://cdn.staticfile.org/moment.js/2.24.0/moment.min.js"></script>
+    <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.6.0.min.js"></script>
     <script src="https://unpkg.com/bootstrap-table@1.19.1/dist/bootstrap-table.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
             document.title = $('a.s-sheetname').text();
+
+            $('#btnScrollRight').click(function () {
+                var scrollPosition = $('div.card-table').prop('scrollLeft');
+                $("div.card-table").scrollLeft(scrollPosition + 100);
+            });
+
+            $('#btnScrollLeft').click(function () {
+                var scrollPosition = $('div.card-table').prop('scrollLeft');
+                $("div.card-table").scrollLeft(scrollPosition - 100);
+            });
+
             $('#lblLastSyncTime').text(moment().format('HH:mm:ss.S'));
         });
 
@@ -76,7 +92,6 @@
         function publishPositions() {
             console.log('Start retriving...');
             $('#lblLastSyncTime').text(moment().format('HH:mm:ss.S'));
-
             var remoteUrl = "sheets?sheetName={{SheetName}}&filter=" + $('#txtFilter').val();
 
             $.ajax({
