@@ -40,6 +40,15 @@ namespace Cms.WebPublisher.Services
         /// </summary>
         private static readonly IAlertRowFormatter[] AltertFormatters = new IAlertRowFormatter[]
         {
+            new ConditionalCellFormatter(  "Prem", 
+                                            (cellValue) => {
+                                                decimal d;
+                                                if( cellValue == null || 
+                                                    !decimal.TryParse(cellValue.ToString().TrimEnd('%'), out d))
+                                                    return false;
+                                                return d > 0;
+                                            }, 
+                                          "s-alert-prem"),
             new TrueFalseAltertRowFormatter("Cancel n", () => "s-alert-cancel-now"),
             new TrueFalseAltertRowFormatter("Bid n", () => "s-alert-bid-now"),
             new TrueFalseAltertRowFormatter("Bid w", () => "s-alert-bid-with"),

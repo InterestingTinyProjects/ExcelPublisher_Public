@@ -31,3 +31,8 @@ div.card-table tr.s-alert-ask-now td:nth-child(9) {
 }
 
 
+/* highlight Prem > 0*/
+div.card-table tr.s-alert-prem td:nth-child(3) {
+    background-color: #fcf8e3 !important;
+}
+    
