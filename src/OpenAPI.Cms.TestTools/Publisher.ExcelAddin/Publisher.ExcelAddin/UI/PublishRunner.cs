@@ -1,4 +1,5 @@
-﻿using Microsoft.Office.Interop.Excel;
+﻿using ExcelDna.Integration;
+using Microsoft.Office.Interop.Excel;
 using OpenApi.Cms.TestTools.Client.DB;
 using OpenApi.Cms.TestTools.Client.Models;
 using Publisher.ExcelAddin.Models;
@@ -57,23 +58,35 @@ namespace Publisher.ExcelAddin.UI
 
         private void PublishSheets()
         {
-            try
-            {
-                if (_isRunning)
-                    return;
+            if (_isRunning)
+                return;
 
-                if (!_reportConfig.CanPublish())
-                    return;
-
-                _isRunning = true;
-                 var data = GetCellData(_sheet, _reportConfig.Range);
-                 PublishToDB(data);
-                _isRunning = false;
-            }
-            catch (Exception ex)
+            // 0x8001010A errors were happened when accessing COM at the time Excel is not "Ready". And the only suggestion by COM is "RETRY LATER"...
+            // To avoid such conflicts, COM actions are synchronized by posting a WM_SYNCMACRO windows message. Excel will then receive the message from Windows in its event loop when it is "Ready" and perform the action. 
+            // This feature is avaible in ExcelDNA - ExcelAsyncUtil.QueueAsMacro. Details: https://docs.excel-dna.net/performing-asynchronous-work/
+            // https://stackoverflow.com/questions/25434845/disposing-of-exceldnautil-application-from-new-thread
+            ExcelAsyncUtil.QueueAsMacro(() =>
             {
-                _isRunning = false;
-            }
+                try
+                {
+                    // Check Can Publish
+                    if (!_reportConfig.CanPublish())
+                        return;
+
+                    // Collect data and publish
+                    _isRunning = true;
+                    var data = GetCellData(_sheet, _reportConfig.Range);
+
+                    // Publish to DB in an async way
+                    PublishToDBAsync(data);
+                    _isRunning = false;
+                }
+                catch (Exception ex)
+                {
+                    _isRunning = false;
+                }
+            });
+
         }
 
         /// <summary>
@@ -83,7 +96,6 @@ namespace Publisher.ExcelAddin.UI
         /// <returns></returns>
         private GenericCellData GetCellData(Worksheet fromSheet, string rangeName)
         {
-            var sheetName = fromSheet.Name;
             var usedRange = string.IsNullOrEmpty(rangeName) ? fromSheet.UsedRange : fromSheet.Range[rangeName];
             var val = usedRange.Value2 as object[,];
 
@@ -114,11 +126,14 @@ namespace Publisher.ExcelAddin.UI
         /// <param name="cellData"></param>
         /// <returns></returns>
         /// 
-        private int PublishToDB(GenericCellData cellData)
+        private void PublishToDBAsync(GenericCellData cellData)
         {
-            var dbConn = _reportConfig.DbConnectionString;
-            var repo = new WebPublisherRepository(dbConn);
-            return repo.PublishPositions(cellData);
+            Task.Run(() =>
+            {
+                var dbConn = _reportConfig.DbConnectionString;
+                var repo = new WebPublisherRepository(dbConn);
+                repo.PublishPositions(cellData);
+            });
         }
 
         public void Dispose()
