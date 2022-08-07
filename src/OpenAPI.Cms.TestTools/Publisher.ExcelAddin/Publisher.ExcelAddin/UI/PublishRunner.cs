@@ -6,6 +6,7 @@ using Publisher.ExcelAddin.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -65,7 +66,7 @@ namespace Publisher.ExcelAddin.UI
                 // COM may reject access and throw an Exception when COM is no Ready when cursor is outside Excel ("0x8001010A Apllication is busy. "). In this case, a message will be sent to Excel to register a callback to publish data in the below catch Exception section
                 PublishData();
             }
-            catch (Exception ex)
+            catch (COMException comEx)
             {
                 // In case of COM rejects access, push a WM_SYNCMACRO windows event to Excel and Excel will callback the PublishData function when COM is ready
                 // "0x8001010A Apllication is busy" errors were happened when accessing COM at the time Excel is not "Ready". And the only suggestion by COM is "RETRY LATER"...
@@ -83,6 +84,10 @@ namespace Publisher.ExcelAddin.UI
                         _isRunning = false;
                     }
                 });
+            }
+            catch (Exception ex)
+            {
+                _isRunning = false;
             }
         }
 
