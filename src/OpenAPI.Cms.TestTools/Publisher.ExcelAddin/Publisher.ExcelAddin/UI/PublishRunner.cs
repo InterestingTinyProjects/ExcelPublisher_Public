@@ -61,15 +61,15 @@ namespace Publisher.ExcelAddin.UI
         {
             try
             {
-                // publishing data in this thread directly.
-                // COM will reject access and throw an Exception when COM is no Ready when cursor is outside Excel ("0x8001010A Apllication is busy. " errors and the only suggestion from COM is Retry Later)
+                // publishing data directly.
+                // COM may reject access and throw an Exception when COM is no Ready when cursor is outside Excel ("0x8001010A Apllication is busy. "). In this case, a message will be sent to Excel to register a callback to publish data in the below catch Exception section
                 PublishData();
             }
             catch (Exception ex)
             {
-                // In case of COM rejects access, push a WM_SYNCMACRO windows event to Excel and Excel will call back the publish function when COM is ready
+                // In case of COM rejects access, push a WM_SYNCMACRO windows event to Excel and Excel will callback the PublishData function when COM is ready
                 // "0x8001010A Apllication is busy" errors were happened when accessing COM at the time Excel is not "Ready". And the only suggestion by COM is "RETRY LATER"...
-                // To avoid such conflicts, COM actions are synchronized by posting a WM_SYNCMACRO windows message. Excel will then receive the message from Windows in its event loop when it is "Ready" and perform the action. 
+                // To avoid such conflicts, COM actions are synchronized by posting a WM_SYNCMACRO windows message. Excel will then receive the message from Windows in its event loop when it is "Ready" and perform the action.
                 // This feature is avaible in ExcelDNA - ExcelAsyncUtil.QueueAsMacro. Details: https://docs.excel-dna.net/performing-asynchronous-work/
                 // https://stackoverflow.com/questions/25434845/disposing-of-exceldnautil-application-from-new-thread
                 ExcelAsyncUtil.QueueAsMacro(() =>
