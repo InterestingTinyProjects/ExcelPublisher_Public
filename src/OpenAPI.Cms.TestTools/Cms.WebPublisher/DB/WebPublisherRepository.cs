@@ -53,7 +53,7 @@ namespace Cms.WebPublisher.DB
                     if (cellData == null)
                         return new GenericCellData
                         {
-                            SheetName = $"[{sheetName}] Not Found"
+                            SheetName = sheetName
                         };
 
                     return cellData;
