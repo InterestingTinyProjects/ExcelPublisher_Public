@@ -1,6 +1,7 @@
 ﻿using Microsoft.Office.Interop.Excel;
 using Newtonsoft.Json;
 using Publisher.ExcelAddin.Models;
+using Serilog.Events;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -34,6 +35,19 @@ namespace OpenApi.Cms.TestTools.Client
                     throw new Exception("Cannot find 'ConfigSheet' in the .confg file");
 
                 return val;
+            }
+        }
+
+        public LogEventLevel LogLevel
+        {
+            get
+            {
+                var val = ConfigurationManager.AppSettings["LogLevel"];
+                var level = LogEventLevel.Error;
+                if (!Enum.TryParse(val, out level))
+                    return LogEventLevel.Error;
+
+                return level;
             }
         }
 

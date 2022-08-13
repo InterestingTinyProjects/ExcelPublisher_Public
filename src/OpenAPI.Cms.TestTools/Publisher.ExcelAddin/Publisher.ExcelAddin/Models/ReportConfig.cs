@@ -103,8 +103,8 @@ namespace Publisher.ExcelAddin.Models
                 return false;
 
             var sheetRowNumber = this.RowNumber + 2;
-            var cellVal = this.ConfigSheet.Range[$"F{sheetRowNumber}"].Value2 as object;
-            if (cellVal == null)
+            var cellVal = this.ConfigSheet.Range[$"F{sheetRowNumber}"].Text;
+            if (string.IsNullOrEmpty(cellVal))
                 return false;
 
             return cellVal.ToString().Equals("true", StringComparison.InvariantCultureIgnoreCase)

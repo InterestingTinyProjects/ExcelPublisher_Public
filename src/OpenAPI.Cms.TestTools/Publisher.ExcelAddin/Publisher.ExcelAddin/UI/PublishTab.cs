@@ -1,11 +1,14 @@
 ﻿using ExcelDna.Integration;
 using ExcelDna.Integration.CustomUI;
+using ExcelDna.Logging;
 using Microsoft.Office.Interop.Excel;
 using Newtonsoft.Json;
 using OpenApi.Cms.TestTools.Client;
 using OpenApi.Cms.TestTools.Client.DB;
 using OpenApi.Cms.TestTools.Client.Models;
 using Publisher.ExcelAddin.UI;
+using Serilog;
+using Serilog.Events;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -60,7 +63,28 @@ namespace Publisher.ExcelAddin
             _app = ExcelDnaUtil.Application as Application;
             if (_app.Workbooks.Count == 0)
                 _app.Workbooks.Add();
+
+            // Initialize Log
+            // Collects "Information" an above but outputs Errors only by default
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .Enrich.WithProcessId()
+                .Enrich.WithThreadId()
+                .WriteTo.File("logs/PublishPluginlog.txt", 
+                                restrictedToMinimumLevel: _config.LogLevel, 
+                                rollingInterval: RollingInterval.Day, 
+                                flushToDiskInterval: TimeSpan.FromSeconds(1),
+                                fileSizeLimitBytes: 1024 * 1024 * 10,
+                                rollOnFileSizeLimit:true,                                
+                                buffered: false,                            
+                                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff}] [{Level:u3}|{ProcessId}-{ThreadId}] {Message:lj}{NewLine}"
+                              )
+                .CreateLogger();
+
+            Log.Logger.Information("PublishPlugin Loaded");
         }
+
+
 
         /// <summary>
         /// Click the Start button
@@ -253,6 +277,7 @@ namespace Publisher.ExcelAddin
         private void ShowMessage(string message)
         {
             //_fromSheet..Cells[0, 0].Value2 = message;
-        } 
+        }
+
     }
 }

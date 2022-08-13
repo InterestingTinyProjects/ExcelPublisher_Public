@@ -1,0 +1,114 @@
+
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[GetLatestPositions]
+	@sheetName NVARCHAR(150),
+	@topCount INT = 1,
+	@isPercentage BIT = 0
+AS
+BEGIN
+
+IF @topCount < 0 
+BEGIN 
+	SET @topCount = 0
+END
+
+IF @isPercentage = 0 
+BEGIN
+	SELECT TOP (@topCount) [publishTime],
+			r.[sheetName],
+			[rows],
+			[columns],
+			[data]
+	FROM [dbo].[Record] r WITH(INDEX(INX_Record_SheetName_PublishTime), NOLOCK) 
+	WHERE sheetName = @sheetName
+	ORDER BY publishTime DESC
+END
+ELSE
+BEGIN
+	SELECT TOP (@topCount) PERCENT [publishTime],
+			r.[sheetName],
+			[rows],
+			[columns],
+			[data]
+	FROM [dbo].[Record] r WITH(INDEX(INX_Record_SheetName_PublishTime), NOLOCK)
+	WHERE sheetName = @sheetName
+	ORDER BY publishTime DESC
+END
+
+END
+GO
+
+
+
+
+/****** Object:  StoredProcedure [dbo].[PublishPositions]    Script Date: 2022/8/12 17:08:23 ******/
+ALTER PROCEDURE [dbo].[PublishPositions]
+	@publishTime DATETIME2,
+	@sheetName NVARCHAR(150),
+	@rows INT,
+	@columns INT,
+	@maxStoredRecords BIGINT = NULL,
+	@data VARBINARY(MAX)
+AS
+BEGIN
+
+	DECLARE @count INT;
+
+	BEGIN TRAN    
+		--remove redundent rows
+		IF @maxStoredRecords IS NOT NULL 
+			AND @maxStoredRecords > 0
+		BEGIN
+			SELECT @count = COUNT(row_id)
+			FROM [dbo].[Record] WITH(NOLOCK)
+			WHERE [sheetName] = @sheetName
+
+			IF @count > @maxStoredRecords
+			BEGIN
+				DELETE [dbo].[Record]
+				WHERE [row_id] IN 
+				(
+					SELECT TOP(@count - @maxStoredRecords + 1) row_id
+					FROM [dbo].[Record]
+					WHERE [sheetName] = @sheetName
+					ORDER BY [publishTime] ASC
+				)
+			END
+		END
+
+		INSERT INTO [dbo].[Record]
+		(
+			[sheetName],
+			[publishTime],
+			[rows],
+			[columns],
+			[data]
+		)
+		VALUES
+		(
+			@sheetName,
+			@publishTime,
+			@rows,
+			@columns,
+			@data
+		)
+
+		
+	IF @@ERROR>0 begin
+        rollback tran 
+		SELECT 0
+        return
+      end
+
+	COMMIT TRAN
+
+	-- return
+	SELECT @@ROWCOUNT
+
+END
+GO
+

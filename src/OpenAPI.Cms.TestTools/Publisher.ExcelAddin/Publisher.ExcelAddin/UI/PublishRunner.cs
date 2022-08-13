@@ -3,6 +3,7 @@ using Microsoft.Office.Interop.Excel;
 using OpenApi.Cms.TestTools.Client.DB;
 using OpenApi.Cms.TestTools.Client.Models;
 using Publisher.ExcelAddin.Models;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,9 +52,10 @@ namespace Publisher.ExcelAddin.UI
         private void SetTimer()
         {
             var interval = _reportConfig.Interval.HasValue? Convert.ToDouble(_reportConfig.Interval.Value): double.MaxValue;
-            _timer = new System.Timers.Timer(interval);
+            _timer = new System.Timers.Timer();
             _timer.Enabled = false;
-            _timer.Elapsed += (s, e) => {
+            _timer.Interval = interval;       
+            _timer.Elapsed += (s, e) => {               
                 PublishSheets();
             };
         }
@@ -64,7 +66,9 @@ namespace Publisher.ExcelAddin.UI
             {
                 // publishing data directly.
                 // COM may reject access and throw an Exception when COM is no Ready when cursor is outside Excel ("0x8001010A Apllication is busy. "). In this case, a message will be sent to Excel to register a callback to publish data in the below catch Exception section
+                Log.Information("Publishing...");
                 PublishData();
+                Log.Information("Done.");
             }
             catch (COMException comEx)
             {
@@ -77,17 +81,22 @@ namespace Publisher.ExcelAddin.UI
                 {
                     try
                     {
+                        Log.Information("WM_SYNCMACRO Publishing...");
                         PublishData();
+                        Log.Information("Done.");
                     }
                     catch (Exception e)
                     {
                         _isRunning = false;
+                        Log.Logger.Error("Publish by Excel Message Error: " + e.Message + e.StackTrace);
                     }
                 });
+                Log.Logger.Information("Sent message WM_SYNCMACRO to Excel.");
             }
             catch (Exception ex)
             {
                 _isRunning = false;
+                Log.Logger.Error("Publish Error: " + ex.Message + ex.StackTrace);
             }
         }
 
@@ -107,10 +116,10 @@ namespace Publisher.ExcelAddin.UI
                 PublishToDBAsync(data);
                 _isRunning = false;
             }
-            catch (Exception ex)
+            catch
             {
                 _isRunning = false;
-                throw ex;
+                throw;
             }
         }
 
@@ -155,23 +164,18 @@ namespace Publisher.ExcelAddin.UI
         /// 
         private void PublishToDBAsync(GenericCellData cellData)
         {
-            Task.Run(() =>
+            try
             {
                 var dbConn = _reportConfig.DbConnectionString;
                 var repo = new WebPublisherRepository(dbConn);
-                return repo.PublishPositions(cellData);
-            }).ContinueWith( updateTask =>
+                repo.PublishPositions(cellData);
+
+            }
+            catch(Exception ex)
             {
-                try 
-                {
-                    if (updateTask.Exception != null)
-                        throw updateTask.Exception;
-                }
-                catch(Exception ex)
-                {
-                    MessageBox.Show(ex.Message + ex.StackTrace, "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-            });
+                Log.Logger.Error("Save to Database Error. " + ex.Message);
+                throw;
+            };
         }
 
         public void Dispose()
@@ -181,8 +185,6 @@ namespace Publisher.ExcelAddin.UI
                 _timer.Dispose();
                 _timer = null;
             }
-            _reportConfig = null;
-            _sheet = null;
 
             GC.SuppressFinalize(this);
         }
