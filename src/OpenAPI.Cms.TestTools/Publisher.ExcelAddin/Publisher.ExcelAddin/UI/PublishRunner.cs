@@ -62,11 +62,12 @@ namespace Publisher.ExcelAddin.UI
 
         private void PublishSheets()
         {
+            var reportName = this._reportConfig.ReportName;
             try
             {
                 // publishing data directly.
                 // COM may reject access and throw an Exception when COM is no Ready when cursor is outside Excel ("0x8001010A Apllication is busy. "). In this case, a message will be sent to Excel to register a callback to publish data in the below catch Exception section
-                Log.Information("Publishing...");
+                Log.Information($"Publishing {reportName}... ");
                 PublishData();
                 Log.Information("Done.");
             }
@@ -77,11 +78,12 @@ namespace Publisher.ExcelAddin.UI
                 // To avoid such conflicts, COM actions are synchronized by posting a WM_SYNCMACRO windows message. Excel will then receive the message from Windows in its event loop when it is "Ready" and perform the action.
                 // This feature is avaible in ExcelDNA - ExcelAsyncUtil.QueueAsMacro. Details: https://docs.excel-dna.net/performing-asynchronous-work/
                 // https://stackoverflow.com/questions/25434845/disposing-of-exceldnautil-application-from-new-thread
-                ExcelAsyncUtil.QueueAsMacro(() =>
+
+                ExcelAsyncUtil.QueueAsMacro((state) =>
                 {
                     try
                     {
-                        Log.Information("WM_SYNCMACRO Publishing...");
+                        Log.Information($"WM_SYNCMACRO Publishing {state}...");
                         PublishData();
                         Log.Information("Done.");
                     }
@@ -90,8 +92,8 @@ namespace Publisher.ExcelAddin.UI
                         _isRunning = false;
                         Log.Logger.Error("Publish by Excel Message Error: " + e.Message + e.StackTrace);
                     }
-                });
-                Log.Logger.Information("Sent message WM_SYNCMACRO to Excel.");
+                }, reportName);
+                Log.Logger.Information($"Sent message WM_SYNCMACRO to Excel... {reportName}");
             }
             catch (Exception ex)
             {
