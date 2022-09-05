@@ -72,6 +72,7 @@ namespace Cms.WebPublisher.Services
         {
             var builder = new StringBuilder();
             builder.Append($"<p class=\"text-muted text-center s-publishTime\" data-publishTime=\"{genericData.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.f")}\">Publish Time: {genericData.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.f")}</p>");
+            builder.Append($"<p class=\"text-muted text-center\">Data Time Tag: {(string.IsNullOrEmpty(genericData.DataTimeTag) ? "-" : genericData.DataTimeTag)}</p>");
             builder.Append("<p><table class=\"table table-striped table-bordered\">");
             builder.Append("<tbody>");
             string[] headers = null;
@@ -219,8 +220,14 @@ namespace Cms.WebPublisher.Services
             if (!data.InactiveTimeout.HasValue)
                 return string.Empty;
 
+            DateTime timestamp;          
+            // Use DataTimeTag if it is a DateTime string
+            // otherwise use Timestamp
+            if (!DateTime.TryParse(data.DataTimeTag, out timestamp))
+                timestamp = data.Timestamp;
+
             // It's been too long?
-            if ((DateTime.Now - data.Timestamp).TotalMilliseconds <= data.InactiveTimeout)
+            if ((DateTime.Now - timestamp).TotalMilliseconds <= data.InactiveTimeout)
                 return string.Empty;
 
             // Return warning
@@ -230,7 +237,8 @@ namespace Cms.WebPublisher.Services
                                 It has been too long since the last publish.
                             </i>
                         </blockquote>
-                            Last Publish Time: {data.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.ff")}
+                            Last Publish Time: {data.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.ff")} <br/>
+                            Last Data Time Tag: {(string.IsNullOrEmpty(data.DataTimeTag)? "-" : data.DataTimeTag)}
                     </div>";
         }
     }

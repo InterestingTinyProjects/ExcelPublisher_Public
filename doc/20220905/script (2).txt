@@ -1,0 +1,39 @@
+Sub Calculate_Range()
+   Range("A1:E213").Calculate
+   Application.OnTime DateAdd("s", 1, Now), "Sheet1.Calculate_Range"
+ End Sub
+
+
+Sub LongRunning1()
+    Dim i
+
+    For i = 1 To 100000
+        Range("A3:E213").Calculate
+    Next i
+    
+    DoEvents
+    MsgBox ("Done")
+
+End Sub
+
+
+Sub LongRunning2()
+    Dim i
+
+    For i = 1 To 100000
+        Range("A3:E213").Calculate
+        If i Mod 100 = 0 Then
+            DoEvents
+        End If
+    Next i
+    
+    DoEvents
+    MsgBox ("Done")
+
+End Sub
+
+
+
+
+
+

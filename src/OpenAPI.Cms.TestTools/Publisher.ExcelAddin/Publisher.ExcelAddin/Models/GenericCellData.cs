@@ -12,6 +12,8 @@ namespace OpenApi.Cms.TestTools.Client.Models
         [JsonIgnore]
         public DateTime Timestamp { get; set; }
 
+        public string DataTimeTag { get; set; }
+
         [JsonIgnore]
         public int Rows { get; set; }
 
@@ -28,8 +30,7 @@ namespace OpenApi.Cms.TestTools.Client.Models
         public long? InactiveTimeout { get; set; }
 
         [JsonIgnore]
-        public long? MaxStoredRecords { get; set; }
-
+        public long? MaxStoredRecords { get; set; }      
     }
 
     public static class GenericCellDataExt

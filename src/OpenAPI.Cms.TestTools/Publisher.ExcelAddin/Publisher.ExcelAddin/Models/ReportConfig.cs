@@ -97,6 +97,8 @@ namespace Publisher.ExcelAddin.Models
             }
         }
 
+        public string DataTimeTag { get; set; }
+
         public bool CanPublish()
         {
             if (this.ConfigSheet == null)

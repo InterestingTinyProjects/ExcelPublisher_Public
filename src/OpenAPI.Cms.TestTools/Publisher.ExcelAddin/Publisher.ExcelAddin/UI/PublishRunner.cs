@@ -112,7 +112,7 @@ namespace Publisher.ExcelAddin.UI
 
                 // Collect data and publish
                 _isRunning = true;
-                var data = GetCellData(_sheet, _reportConfig.Range);
+                var data = GetCellData(_sheet, _reportConfig.Range, _reportConfig.DataTimeTag);
 
                 // Publish to DB in an async way
                 PublishToDBAsync(data);
@@ -132,8 +132,16 @@ namespace Publisher.ExcelAddin.UI
         /// </summary>
         /// <param name="fromSheet"></param>
         /// <returns></returns>
-        private GenericCellData GetCellData(Worksheet fromSheet, string rangeName)
+        private GenericCellData GetCellData(Worksheet fromSheet, string rangeName, string dataTimeTagAddress)
         {
+            var dataTimeTag = string.Empty;
+            if (!string.IsNullOrEmpty(dataTimeTagAddress))
+            {
+                var dataTimeTagRange = fromSheet.Range[dataTimeTagAddress];
+                dataTimeTag = dataTimeTagRange.Text;
+            }
+
+            // read report data
             var usedRange = string.IsNullOrEmpty(rangeName) ? fromSheet.UsedRange : fromSheet.Range[rangeName];
             var val = usedRange.Value2 as object[,];
 
@@ -149,7 +157,8 @@ namespace Publisher.ExcelAddin.UI
                 SheetName = _reportConfig.ReportName,
                 Formatter = _reportConfig.Formatter,
                 InactiveTimeout = _reportConfig.InactiveTimeout,
-                MaxStoredRecords = _reportConfig.MaxStoredRecords
+                MaxStoredRecords = _reportConfig.MaxStoredRecords,
+                DataTimeTag = dataTimeTag
             };
 
             //var form = new FormCopyData();

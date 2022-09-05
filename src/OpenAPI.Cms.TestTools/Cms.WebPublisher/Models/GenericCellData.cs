@@ -22,6 +22,8 @@ namespace Cms.WebPublisher.Models
 
         public long? InactiveTimeout { get; set; }
 
+        public string DataTimeTag { get; set; }
+
         public bool HasValue
         {
             get

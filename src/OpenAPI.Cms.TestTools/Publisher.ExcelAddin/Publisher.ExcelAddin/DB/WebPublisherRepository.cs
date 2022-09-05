@@ -167,6 +167,14 @@ namespace OpenApi.Cms.TestTools.Client.DB
                         });
                     }
 
+                    if (!string.IsNullOrEmpty(cellData.DataTimeTag))
+                    {
+                        command.Parameters.Add(new SqlParameter("@dataTimeTag", SqlDbType.NVarChar)
+                        {
+                            Value = cellData.DataTimeTag
+                        });
+                    }
+
                     return (int)command.ExecuteScalar();
                 }
                 catch

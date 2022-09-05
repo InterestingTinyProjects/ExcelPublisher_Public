@@ -48,6 +48,7 @@ namespace Cms.WebPublisher.DB
                         cellData.Timestamp = (DateTime)reader["publishTime"];
                         cellData.Rows = (int)reader["rows"];
                         cellData.Columns = (int)reader["columns"];
+                        cellData.DataTimeTag = reader["dataTimeTag"]?.ToString();
                     }
 
                     if (cellData == null)
