@@ -1,6 +1,3 @@
-ALTER TABLE [dbo].[Record] ADD dataTimeTag NVARCHAR(50) NULL DEFAULT NULL
-
-
 
 /****** Object:  StoredProcedure [dbo].[PublishPositions]    Script Date: 2022/8/12 17:08:23 ******/
 ALTER PROCEDURE [dbo].[PublishPositions]
@@ -70,46 +67,4 @@ BEGIN
 	SELECT @@ROWCOUNT
 
 END
-
-
-
-ALTER PROCEDURE [dbo].[GetLatestPositions]
-	@sheetName NVARCHAR(150),
-	@topCount INT = 1,
-	@isPercentage BIT = 0
-AS
-BEGIN
-
-IF @topCount < 0 
-BEGIN 
-	SET @topCount = 0
-END
-
-IF @isPercentage = 0 
-BEGIN
-	SELECT TOP (@topCount) [publishTime],
-			r.[sheetName],
-			[rows],
-			[columns],
-			[data],
-			[dataTimeTag]
-	FROM [dbo].[Record] r WITH(INDEX(INX_Record_SheetName_PublishTime), NOLOCK) 
-	WHERE sheetName = @sheetName
-	ORDER BY publishTime DESC
-END
-ELSE
-BEGIN
-	SELECT TOP (@topCount) PERCENT [publishTime],
-			r.[sheetName],
-			[rows],
-			[columns],
-			[data],
-			[dataTimeTag]
-	FROM [dbo].[Record] r WITH(INDEX(INX_Record_SheetName_PublishTime), NOLOCK)
-	WHERE sheetName = @sheetName
-	ORDER BY publishTime DESC
-END
-
-END
-
 
