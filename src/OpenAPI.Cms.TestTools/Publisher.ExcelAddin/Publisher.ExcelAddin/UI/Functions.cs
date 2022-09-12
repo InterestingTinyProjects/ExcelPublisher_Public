@@ -37,14 +37,21 @@ namespace Publisher.ExcelAddin.UI
         [ExcelFunction(Description = "Get report from DB")]
         public static object __GetReport(string reportName, string columnsObj)
         {
-            GenericCellData data = LoadReport(reportName);
-            var columns = Array.Empty<string>();
-            if(!string.IsNullOrEmpty(columnsObj))
-                columns = columnsObj?.Split(',').Select(s => s.Trim())
-                                                .Where(s => !string.IsNullOrEmpty(s))
-                                                .ToArray();
+            try
+            {
+                GenericCellData data = LoadReport(reportName);
+                var columns = Array.Empty<string>();
+                if (!string.IsNullOrEmpty(columnsObj))
+                    columns = columnsObj?.Split(',').Select(s => s.Trim())
+                                                    .Where(s => !string.IsNullOrEmpty(s))
+                                                    .ToArray();
 
-            return data.ToExcelValue(true, columns);
+                return data.ToExcelValue(true, columns);
+            }
+            catch(Exception ex)
+            {
+                return "Error: " + ex.Message + ex.StackTrace;
+            }
         }
 
         //[ExcelFunction(Description = "Load a report from DB to excel")]
