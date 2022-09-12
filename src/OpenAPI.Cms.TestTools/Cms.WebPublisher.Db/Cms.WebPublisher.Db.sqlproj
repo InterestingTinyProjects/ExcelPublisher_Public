@@ -83,7 +83,13 @@
     <None Include="SQLScripts_v5_NoLock.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="SQLScripts_v6_DataTimeTag.txt">
+    <None Include="SQLScripts_v6_DataTimeTag_01Table.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="SQLScripts_v6_DataTimeTag_02SP1.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="SQLScripts_v6_DataTimeTag_03SP2.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

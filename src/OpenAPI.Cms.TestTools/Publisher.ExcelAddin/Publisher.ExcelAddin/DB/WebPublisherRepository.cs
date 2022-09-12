@@ -79,7 +79,7 @@ namespace OpenApi.Cms.TestTools.Client.DB
         }
 
 
-        public GenericCellData[] GetReportData(string reportName, int topRows)
+        public GenericCellData[] GetReportData(string reportName, int topRows, bool isPercentage = false)
         {
             string spName = "dbo.GetLatestPositions";
             using (var conn = new SqlConnection(_connString))
@@ -103,7 +103,7 @@ namespace OpenApi.Cms.TestTools.Client.DB
 
                     command.Parameters.Add(new SqlParameter("@isPercentage", SqlDbType.Bit)
                     {
-                        Value = false
+                        Value = isPercentage
                     });
 
                     var reader = command.ExecuteReader();
@@ -202,6 +202,7 @@ namespace OpenApi.Cms.TestTools.Client.DB
                 cellData.Timestamp = (DateTime)reader["publishTime"];
                 cellData.Rows = (int)reader["rows"];
                 cellData.Columns = (int)reader["columns"];
+                cellData.DataTimeTag = reader["dataTimeTag"] as string;
 
                 ret.Add(cellData);
             }

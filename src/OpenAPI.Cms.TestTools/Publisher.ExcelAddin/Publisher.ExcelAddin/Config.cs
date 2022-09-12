@@ -52,6 +52,15 @@ namespace OpenApi.Cms.TestTools.Client
             }
         }
 
+        public String WebPublisherDB
+        {
+            get
+            {
+                var val = ConfigurationManager.AppSettings["WebPublisherDB"];
+                return val;
+            }
+        }
+
         public ReportConfig[] GetConfigurations(Worksheet configSheet)
         {
             var val = configSheet.UsedRange.Value2 as object[,];
