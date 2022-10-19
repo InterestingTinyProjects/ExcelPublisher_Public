@@ -35,4 +35,18 @@ div.card-table tr.s-alert-ask-now td:nth-child(9) {
 div.card-table tr.s-alert-prem td:nth-child(3) {
     background-color: #fcf8e3 !important;
 }
-    
+
+/* In IndexFutures page*/
+/* set the style of Bid for Bid now*/
+div.card-table tr.s-alert-bid-now-if td:nth-child(4) {
+    background-color: mistyrose !important;
+    font-weight: bolder !important;
+    color: red !important;
+}
+
+/* set the style of Ask for Ask now*/
+div.card-table tr.s-alert-ask-now-if td:nth-child(5) {
+    background-color: greenyellow !important;
+    font-weight: bolder !important;
+    color: rgb(8,163,69) !important;
+}

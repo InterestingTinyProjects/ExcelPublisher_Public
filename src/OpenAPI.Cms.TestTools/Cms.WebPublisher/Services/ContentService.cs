@@ -40,20 +40,25 @@ namespace Cms.WebPublisher.Services
         /// </summary>
         private static readonly IAlertRowFormatter[] AltertFormatters = new IAlertRowFormatter[]
         {
-            new ConditionalCellFormatter(  "Prem", 
+            //for Position page
+            new ConditionalCellFormatter(  "Prem",
                                             (cellValue) => {
                                                 decimal d;
-                                                if( cellValue == null || 
+                                                if( cellValue == null ||
                                                     !decimal.TryParse(cellValue.ToString().TrimEnd('%'), out d))
                                                     return false;
                                                 return d > 0;
-                                            }, 
+                                            },
                                           "s-alert-prem"),
             new TrueFalseAltertRowFormatter("Cancel n", () => "s-alert-cancel-now"),
             new TrueFalseAltertRowFormatter("Bid n", () => "s-alert-bid-now"),
             new TrueFalseAltertRowFormatter("Bid w", () => "s-alert-bid-with"),
             new TrueFalseAltertRowFormatter("Ask n", () => "s-alert-ask-now"),
             new TrueFalseAltertRowFormatter("Ask w", () => "s-alert-ask-with"),
+
+            //for IndexFutures page
+            new TrueFalseAltertRowFormatter("Should IF bid", () => "s-alert-bid-now-if"),
+            new TrueFalseAltertRowFormatter("Should IF ask", () => "s-alert-ask-now-if"),
         };
 
 
@@ -81,12 +86,12 @@ namespace Cms.WebPublisher.Services
                 // Get texts to be shown in a table row
                 var texts = GetRowTexts(genericData, i);
                 if (i == 0)
-                    headers = texts.Select( h => h == null? string.Empty : h.ToString()).ToArray();
+                    headers = texts.Select(h => h == null ? string.Empty : h.ToString()).ToArray();
 
                 // Apply filter
-                if ( i > 0 
+                if (i > 0
                     && !string.IsNullOrEmpty(filter)
-                    && !texts.Any( t => t is string && ((string)t).Contains(filter)))
+                    && !texts.Any(t => t is string && ((string)t).Contains(filter)))
                     continue;
 
                 // Generate html for a table row
@@ -125,7 +130,7 @@ namespace Cms.WebPublisher.Services
         private void HandleRowFormatters(StringBuilder builder, object[] cellTexts, string[] headers)
         {
             var alterts = AltertFormatters.Where(f => f.ShouldApply(cellTexts, headers));
-            if(alterts.Any())
+            if (alterts.Any())
             {
                 builder.Append(" class='");
                 foreach (var alert in alterts)
@@ -220,7 +225,7 @@ namespace Cms.WebPublisher.Services
             if (!data.InactiveTimeout.HasValue)
                 return string.Empty;
 
-            DateTime timestamp;          
+            DateTime timestamp;
             // Use DataTimeTag if it is a DateTime string
             // otherwise use Timestamp
             if (!DateTime.TryParse(data.DataTimeTag, out timestamp))
@@ -238,7 +243,7 @@ namespace Cms.WebPublisher.Services
                             </i>
                         </blockquote>
                             Last Publish Time: {data.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.ff")} <br/>
-                            Last Data Time Tag: {(string.IsNullOrEmpty(data.DataTimeTag)? "-" : data.DataTimeTag)}
+                            Last Data Time Tag: {(string.IsNullOrEmpty(data.DataTimeTag) ? "-" : data.DataTimeTag)}
                     </div>";
         }
     }
